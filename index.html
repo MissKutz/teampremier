@@ -346,6 +346,114 @@
         border-color: #ff4444;
     }
 
+    .agent-face-images {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        z-index: 2;
+        border-radius: 7px;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .agent-face-images.show {
+        display: flex;
+    }
+
+    .agent-face-image {
+        flex: 1;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: rgba(0,0,0,0.5);
+        border-right: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .agent-face-image:last-child {
+        border-right: none;
+    }
+
+    .agent-face-image.horizontal-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+        padding: 4px;
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 10;
+    }
+
+    .agent-face-image.horizontal-list .agent-face-img {
+        flex: none;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.3);
+        background-color: rgba(0,0,0,0.7);
+        position: relative;
+        z-index: 11;
+    }
+
+    .agent-face-img {
+        width: 100%;
+        height: 100%;n        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .agent-background-split {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        z-index: 1;
+        border-radius: 7px;
+        overflow: hidden;
+    }
+
+    .agent-background-split.show {
+        display: flex;
+    }
+
+    .agent-background-part {
+        flex: 1;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .agent-foreground-square {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.5);
+        background-color: rgba(0,0,0,0.7);
+        z-index: 20;
+        display: none;
+        overflow: hidden;
+    }
+
+    .agent-foreground-square.show {
+        display: block;
+    }
+
+    .agent-foreground-square img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
  </style>
 </head>
 <body>
@@ -372,6 +480,9 @@
         <div class="square-back">
             <img src="img/agents/agent_8.png" class="agent-default-img">
             <div class="agent-split"></div>
+            <div class="agent-face-images"></div>
+            <div class="agent-background-split"></div>
+            <div class="agent-foreground-square"></div>
             <div class="agent-inputs">
                 <input type="text" class="agent-input" placeholder="Agent 1...">
                 <input type="text" class="agent-input" placeholder="Agent 2...">
@@ -407,6 +518,9 @@
         <div class="square-back">
             <img src="img/agents/agent_8.png" class="agent-default-img">
             <div class="agent-split"></div>
+            <div class="agent-face-images"></div>
+            <div class="agent-background-split"></div>
+            <div class="agent-foreground-square"></div>
             <div class="agent-inputs">
                 <input type="text" class="agent-input" placeholder="Agent 1...">
                 <input type="text" class="agent-input" placeholder="Agent 2...">
@@ -442,6 +556,9 @@
         <div class="square-back">
             <img src="img/agents/agent_8.png" class="agent-default-img">
             <div class="agent-split"></div>
+            <div class="agent-face-images"></div>
+            <div class="agent-background-split"></div>
+            <div class="agent-foreground-square"></div>
             <div class="agent-inputs">
                 <input type="text" class="agent-input" placeholder="Agent 1...">
                 <input type="text" class="agent-input" placeholder="Agent 2...">
@@ -477,6 +594,9 @@
         <div class="square-back">
             <img src="img/agents/agent_8.png" class="agent-default-img">
             <div class="agent-split"></div>
+            <div class="agent-face-images"></div>
+            <div class="agent-background-split"></div>
+            <div class="agent-foreground-square"></div>
             <div class="agent-inputs">
                 <input type="text" class="agent-input" placeholder="Agent 1...">
                 <input type="text" class="agent-input" placeholder="Agent 2...">
@@ -514,6 +634,9 @@
         <div class="square-back">
             <img src="img/agents/agent_8.png" class="agent-default-img">
             <div class="agent-split"></div>
+            <div class="agent-face-images"></div>
+            <div class="agent-background-split"></div>
+            <div class="agent-foreground-square"></div>
             <div class="agent-inputs">
                 <input type="text" class="agent-input" placeholder="Agent 1...">
                 <input type="text" class="agent-input" placeholder="Agent 2...">
@@ -549,6 +672,9 @@
         <div class="square-back">
             <img src="img/agents/agent_8.png" class="agent-default-img">
             <div class="agent-split"></div>
+            <div class="agent-face-images"></div>
+            <div class="agent-background-split"></div>
+            <div class="agent-foreground-square"></div>
             <div class="agent-inputs">
                 <input type="text" class="agent-input" placeholder="Agent 1...">
                 <input type="text" class="agent-input" placeholder="Agent 2...">
@@ -584,6 +710,9 @@
         <div class="square-back">
             <img src="img/agents/agent_8.png" class="agent-default-img">
             <div class="agent-split"></div>
+            <div class="agent-face-images"></div>
+            <div class="agent-background-split"></div>
+            <div class="agent-foreground-square"></div>
             <div class="agent-inputs">
                 <input type="text" class="agent-input" placeholder="Agent 1...">
                 <input type="text" class="agent-input" placeholder="Agent 2...">
@@ -671,45 +800,81 @@
     localStorage.setItem('agentConfig-' + name, JSON.stringify(config));
   }
 
-  function renderSplit(square, config) {
-    const { count, agents } = config;
-    const img = square.querySelector('.agent-default-img');
-    const split = square.querySelector('.agent-split');
-    const inputs = square.querySelector('.agent-inputs');
-    const inputFields = inputs.querySelectorAll('.agent-input');
+   function renderAgentDisplay(square, config) {
+     const { count, agents } = config;
+     const img = square.querySelector('.agent-default-img');
+     const split = square.querySelector('.agent-split');
+     const inputs = square.querySelector('.agent-inputs');
+     const inputFields = inputs.querySelectorAll('.agent-input');
+     const faceImages = square.querySelector('.agent-face-images');
+     const backgroundSplit = square.querySelector('.agent-background-split');
+     const foregroundSquare = square.querySelector('.agent-foreground-square');
 
-    if (count === 0) {
-      inputs.classList.remove('visible');
-      img.src = 'img/agents/agent_8.png';
-      img.style.display = 'block';
-      split.innerHTML = '';
-      split.style.display = 'none';
-      return;
-    }
+     if (count === 0) {
+       inputs.classList.remove('visible');
+       img.src = 'img/agents/agent_8.png';
+       img.style.display = 'block';
+       split.innerHTML = '';
+       split.style.display = 'none';
+       faceImages.classList.remove('show');
+       faceImages.innerHTML = '';
+       backgroundSplit.classList.remove('show');
+       backgroundSplit.innerHTML = '';
+       foregroundSquare.classList.remove('show');
+       foregroundSquare.innerHTML = '';
+       return;
+     }
 
-    inputs.classList.add('visible');
-    inputFields.forEach((input, i) => {
-      input.style.display = i < count ? 'block' : 'none';
-      if (i < count && agents[i]) input.value = agents[i];
-      else if (i >= count) input.value = '';
-    });
+     inputs.classList.add('visible');
+     inputFields.forEach((input, i) => {
+       input.style.display = i < count ? 'block' : 'none';
+       if (i < count && agents[i]) input.value = agents[i];
+       else if (i >= count) input.value = '';
+     });
 
-    const validAgents = agents.slice(0, count).map(a => a && agentImages[a] ? a : null);
-    const hasAll = validAgents.every(a => a !== null);
+     const validAgents = agents.slice(0, count).map(a => a && agentImages[a] ? a : null);
+     const hasAll = validAgents.every(a => a !== null);
 
-    if (!hasAll || validAgents.length === 0) {
-      img.style.display = 'block';
-      img.src = 'img/agents/agent_8.png';
-      split.innerHTML = '';
-      split.style.display = 'none';
-      return;
-    }
+     if (!hasAll || validAgents.length === 0) {
+       img.style.display = 'block';
+       img.src = 'img/agents/agent_8.png';
+       split.innerHTML = '';
+       split.style.display = 'none';
+       faceImages.classList.remove('show');
+       faceImages.innerHTML = '';
+       backgroundSplit.classList.remove('show');
+       backgroundSplit.innerHTML = '';
+       foregroundSquare.classList.remove('show');
+       foregroundSquare.innerHTML = '';
+       return;
+     }
 
-    img.style.display = 'none';
-    split.innerHTML = validAgents.map(a =>
-      `<div class="agent-split-part" style="background-image:url('${agentImages[a]}')"></div>`
-    ).join('');
-    split.style.display = 'flex';
+     img.style.display = 'none';
+     split.innerHTML = '';
+     split.style.display = 'none';
+     faceImages.classList.remove('show');
+     faceImages.innerHTML = '';
+     backgroundSplit.classList.remove('show');
+     backgroundSplit.innerHTML = '';
+     foregroundSquare.classList.remove('show');
+     foregroundSquare.innerHTML = '';
+
+     if (count === 1) {
+       img.style.display = 'block';
+       img.src = agentImages[validAgents[0]];
+     } else if (count === 2) {
+       backgroundSplit.className = 'agent-background-split show';
+       backgroundSplit.innerHTML = validAgents.map(a =>
+         `<div class="agent-background-part" style="background-image:url('${agentImages[a]}')"></div>`
+       ).join('');
+     } else if (count === 3) {
+       backgroundSplit.className = 'agent-background-split show';
+       backgroundSplit.innerHTML = validAgents.slice(0, 2).map(a =>
+         `<div class="agent-background-part" style="background-image:url('${agentImages[a]}')"></div>`
+       ).join('');
+       foregroundSquare.className = 'agent-foreground-square show';
+       foregroundSquare.innerHTML = `<img src="${agentImages[validAgents[2]]}" alt="Agent 3">`;
+     }
   }
 
   function updateFromInput(input) {
@@ -725,8 +890,27 @@
     const config = getConfig(square);
     const index = Array.from(input.parentElement.querySelectorAll('.agent-input')).indexOf(input);
     config.agents[index] = val;
-    renderSplit(square, config);
+    renderAgentDisplay(square, config);
     saveConfig(square);
+  }
+
+  function handleToggleClick(toggle) {
+    const square = toggle.closest('.square');
+    const choices = toggle.parentElement.querySelector('.agent-choices');
+    const inputs = square.querySelector('.agent-inputs');
+
+    choices.classList.toggle('open');
+
+    if (choices.classList.contains('open')) {
+      const selectedOpt = square.querySelector('.agent-opt.selected');
+      const count = selectedOpt ? parseInt(selectedOpt.dataset.value) : 0;
+      inputs.classList.add('visible');
+      Array.from(inputs.querySelectorAll('.agent-input')).forEach((input, i) => {
+        input.style.display = i < count ? 'block' : 'none';
+      });
+    } else {
+      inputs.classList.remove('visible');
+    }
   }
 
   function handleOptClick(opt) {
@@ -738,7 +922,7 @@
     setTimeout(() => opt.closest('.agent-choices').classList.remove('open'), 600);
 
     const config = { count: val, agents: ['', '', ''] };
-    renderSplit(square, config);
+    renderAgentDisplay(square, config);
     saveConfig(square);
   }
 
@@ -754,7 +938,7 @@
             square.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
             opt.classList.add('selected');
           }
-          renderSplit(square, config);
+          renderAgentDisplay(square, config);
         } catch (e) {}
       }
     });
@@ -767,8 +951,7 @@
     }
     const toggle = e.target.closest('.agent-toggle');
     if (toggle) {
-      const choices = toggle.parentElement.querySelector('.agent-choices');
-      choices.classList.toggle('open');
+      handleToggleClick(toggle);
     }
     const opt = e.target.closest('.agent-opt');
     if (opt) {
@@ -780,13 +963,32 @@
     const input = e.target.closest('.agent-input');
     if (input && e.key === 'Enter') {
       updateFromInput(input);
+      setTimeout(() => {
+        const square = input.closest('.square');
+        const inputs = square.querySelector('.agent-inputs');
+        inputs.classList.remove('visible');
+      }, 100);
     }
   });
 
   document.querySelector('.squares').addEventListener('focusout', function(e) {
     const input = e.target.closest('.agent-input');
-    if (input) {
+    if (input && input.value.trim()) {
       updateFromInput(input);
+      setTimeout(() => {
+        const square = input.closest('.square');
+        const inputs = square.querySelector('.agent-inputs');
+        inputs.classList.remove('visible');
+      }, 100);
+    }
+  });
+
+  document.querySelector('.squares').addEventListener('focusin', function(e) {
+    const input = e.target.closest('.agent-input');
+    if (input) {
+      const square = input.closest('.square');
+      const inputs = square.querySelector('.agent-inputs');
+      inputs.classList.add('visible');
     }
   });
 
