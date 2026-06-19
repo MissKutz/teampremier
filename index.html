@@ -6,16 +6,17 @@
     <title>Team Premier</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif, 'Bitter', 'Georgia', 'PlayfairDisplay', 'EB Garamond', 'Lora', 'Bebas Neue';
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
             background: linear-gradient(100deg, #000000, #764ba2, #7c3b68);
             color: #fff;
-            }
+        }
+
         .container {
             text-align: center;
             padding: 2rem;
@@ -40,17 +41,163 @@
         display: inline-block;
     }
 
-    .back-btn:hover {
+        .back-btn:hover {
         opacity: 0.7;
     }
-    </style>
+
+    .footer-btn {
+        margin-top: auto;
+        text-align: center;
+        padding-bottom: 2rem;
+    }
+
+    .squares {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 2rem 0;
+        flex: 1;
+    }
+
+    .row-4, .row-3 {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+            .square {
+        width: 300px;
+        height: 300px;
+        border: 3px solid #fff;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .square-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-top: 3rem;
+    }
+
+    .square-title {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .square-links {
+        list-style: none;
+        padding: 0;
+        margin-top: 2rem;
+        text-align: left;
+        font-size: 1.35rem;
+    }
+
+    .square-links li {
+        padding: 4px 0;
+    }
+
+ </style>
 </head>
 <body>
     <div class="container">
-        <h1>Team Premier</h1>
-        <p>Plastic4ever #plouf</p>
-        <div="text-align:center;">
-            <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
+        <h1 class="gradient-text" style="font-family: 'EB Garamond'; font-size: 4.0rem;">Plastic4ever</h1>
+        <h2 class="gradient-text" style="font-family: 'EB Garamond', serif;margin-top: -1rem;">#plouf</h2>
+        <p  class="gradient-text" style="font-family: 'PlayfairDisplay', serif;">Point de la team : </p>
+    </div>
+
+<div class="squares">
+    <div class="row-4">
+            <div class="square">
+        <div class="square-header">
+            <span class="square-title">Morgane</span>
+        </div>
+        <ul class="square-links">
+            <li>- Valorant: MissKutz #519</li>
+            <li>- Discord</li>
+            <li>- Instagram</li>
+        </ul>
+    </div>
+
+        <div class="square">
+        <div class="square-header">
+            <span class="square-title">Enzo</span>
+        </div>
+        <ul class="square-links">
+            <li>- Valorant: Misu #773</li>
+            <li>- Discord</li>
+            <li>- Instagram</li>
+        </ul>
+    </div>
+
+        <div class="square">
+        <div class="square-header">
+            <span class="square-title">Jules</span>
+        </div>
+        <ul class="square-links">
+            <li>- Valorant</li>
+            <li>- Discord</li>
+            <li>- Instagram</li>
+        </ul>
+    </div>
+
+        <div class="square">
+        <div class="square-header">
+            <span class="square-title">Seb</span>
+        </div>
+        <ul class="square-links">
+            <li>- Valorant: Pollux #PoPo</li>
+            <li>- Discord</li>
+            <li>- Instagram</li>
+        </ul>
+    </div>
+</div>
+
+<div class="row-3">
+        <div class="square">
+        <div class="square-header">
+            <span class="square-title">Orphée</span>
+        </div>
+        <ul class="square-links">
+            <li>- Valorant: Innocent man #</li>
+            <li>- Discord</li>
+            <li>- Instagram</li>
+        </ul>
+    </div>
+
+        <div class="square">
+        <div class="square-header">
+            <span class="square-title">Octave</span>
+        </div>
+        <ul class="square-links">
+            <li>- Valorant</li>
+            <li>- Discord</li>
+            <li>- Instagram</li>
+        </ul>
+    </div>  
+
+        <div class="square">
+        <div class="square-header">
+            <span class="square-title">Clément</span>
+        </div>
+        <ul class="square-links">
+            <li>- Valorant: Clemrsse #2609</li>
+            <li>- Discord</li>
+            <li>- Instagram</li>
+        </ul>
+    </div>
+</div>
+</div>
+
+    <div class="footer-btn">
+        <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
     </div>
     <script type="module">
   // Import the functions you need from the SDKs you need
