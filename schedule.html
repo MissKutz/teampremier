@@ -365,7 +365,23 @@
                     } catch (e) {}
                 }
             } else {
-                selected = [...greens, ...oranges, ...violets].slice(0, 5);
+                // Si totalAvailable >= 5 et greens.length <= 5, sélectionner tous les greens + les oranges les plus tôt
+                // Ex: 4 verts + 2 oranges → sélectionner tous les 4 verts + l'orange le plus tôt
+                const allCandidates = [...greens, ...oranges, ...violets];
+                // Trier les oranges par heure de contrainte (la plus tôt en premier)
+                const sortedOranges = oranges.sort((a, b) => {
+                    const timeA = a.contrainte.match(/(\d{1,2})h(\d{2})?/);
+                    const timeB = b.contrainte.match(/(\d{1,2})h(\d{2})?/);
+                    if (!timeA || !timeB) return 0;
+                    const totalA = parseInt(timeA[1]) * 60 + (timeA[2] ? parseInt(timeA[2]) : 0);
+                    const totalB = parseInt(timeB[1]) * 60 + (timeB[2] ? parseInt(timeB[2]) : 0);
+                    return totalA - totalB;
+                });
+                // Sélectionner tous les greens + les oranges les plus tôt pour atteindre 5 joueurs
+                const needed = Math.min(5, greens.length + sortedOranges.length);
+                const earliestOranges = sortedOranges.slice(0, needed - greens.length);
+                selected = [...greens, ...earliestOranges];
+                if (selected.length > 5) selected = selected.slice(0, 5);
             }
             const typeLabel = cal.type === "entrainement" ? "entrainement" : "match";
             const scheduledStart = parseInt(cal.horaire.split("h")[0]);
@@ -745,7 +761,7 @@
             const welcome = document.createElement("div");
             welcome.style.fontSize = "1.2rem";
             welcome.style.fontWeight = "bold";
-            welcome.innerHTML = currentIsAdmin ? "Bienvenue<br>Admin" : "Bienvenue<br>" + (surnom || data.nom);
+            welcome.innerHTML = currentIsAdmin ? "Bienvenue<br>Admin " + (surnom || data.nom) : "Bienvenue<br>" + (surnom || data.nom);
             left.appendChild(welcome);
 
             const center = document.createElement("div");
