@@ -186,14 +186,14 @@
                 <tr><td>Morgane</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                 <tr><td>Enzo</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                 <tr><td>Jules</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>S&eacute;bastien</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Orph&eacute;e</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Sébastien</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Orphée</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                 <tr><td>Octave</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Cl&eacute;ment</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Clément</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
             </tbody>
         </table>
         <div style="text-align:center;">
-            <a href="index.html" class="back-btn">Retour &agrave; l'accueil</a>
+            <a href="index.html" class="back-btn">Retour à l'accueil</a>
         </div>
     </div>
 
@@ -215,21 +215,21 @@
 
         const JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
         const STATUTS = [
-            { value: "absent_reponse", label: "Pas de r\u00e9ponse" },
-            { value: "present", label: "Pr\u00e9sent" },
+            { value: "absent_reponse", label: "Pas de réponse" },
+            { value: "present", label: "Présent" },
             { value: "absent", label: "Absent" },
-            { value: "contrainte_horaire", label: "Pr\u00e9sent avec contrainte horaire" },
-            { value: "abstention", label: "Pr\u00e9sent mais s'abstenir" }
+            { value: "contrainte_horaire", label: "Présent avec contrainte horaire" },
+            { value: "abstention", label: "Présent mais s'abstenir" }
         ];
 
         const MEMBRES_DATA = [
-            { id: "morgane", nom: "Morgane", mdp: "14022019", mdp_admin: "Admin_mk_11", estAdmin: true },
-            { id: "enzo", nom: "Enzo", mdp: "2323", mdp_admin: "Enzo_misu_12", estAdmin: true },
-            { id: "jules", nom: "Jules", mdp: "julesf0128", estAdmin: false },
-            { id: "sebastien", nom: "S\u00e9bastien", mdp: "Honda06+", estAdmin: false },
-            { id: "orphee", nom: "Orph\u00e9e", mdp: "jemeraivoiralexiaenrobedechambre69", estAdmin: false },
-            { id: "octave", nom: "Octave", mdp: "motdepasse.1", estAdmin: false },
-            { id: "clement", nom: "Cl\u00e9ment", mdp: "clemrsse123", estAdmin: false }
+            { id: "morgane", nom: "Morgane", surnom: "MK", mdp: "14022019", mdp_admin: "Admin_mk_11" },
+            { id: "enzo", nom: "Enzo", surnom: "Misu", mdp: "2323", mdp_admin: "Enzo_misu_12" },
+            { id: "jules", nom: "Jules", surnom: "FDM", mdp: "julesf0128" },
+            { id: "sebastien", nom: "Sébastien", surnom: "Pollux", mdp: "Honda06+" },
+            { id: "orphee", nom: "Orphée", surnom: "Orphée", mdp: "jemeraivoiralexiaenrobedechambre69" },
+            { id: "octave", nom: "Octave", surnom: "SacadUwU", mdp: "motdepasse.1" },
+            { id: "clement", nom: "Clément", surnom: "Clemrsse", mdp: "clemrsse123" }
         ];
 
         async function seedFirestore() {
@@ -246,7 +246,6 @@
                         nom: m.nom,
                         mdp: m.mdp,
                         ...(m.mdp_admin ? { mdp_admin: m.mdp_admin } : {}),
-                        estAdmin: m.estAdmin,
                         edt
                     });
                 }
@@ -299,24 +298,25 @@
             const mdp = mdpInput.value.trim();
             if (!mdp) return;
 
-            const q = query(collection(db, "membres"), where("mdp", "==", mdp));
-            const snapshot = await getDocs(q);
+            // Vérifier d'abord les mots de passe admin
+            const qAdmin = query(collection(db, "membres"), where("mdp_admin", "==", mdp));
+            const adminSnapshot = await getDocs(qAdmin);
 
             let membreId = null;
             let membreData = null;
             let isAdmin = false;
 
-            if (snapshot.size > 0) {
-                membreId = snapshot.docs[0].id;
-                membreData = snapshot.docs[0].data();
-                isAdmin = membreData.estAdmin === true;
+            if (adminSnapshot.size > 0) {
+                membreId = adminSnapshot.docs[0].id;
+                membreData = adminSnapshot.docs[0].data();
+                isAdmin = true;
             } else {
-                const qAdmin = query(collection(db, "membres"), where("mdp_admin", "==", mdp));
-                const adminSnapshot = await getDocs(qAdmin);
-                if (adminSnapshot.size > 0) {
-                    membreId = adminSnapshot.docs[0].id;
-                    membreData = adminSnapshot.docs[0].data();
-                    isAdmin = true;
+                const q = query(collection(db, "membres"), where("mdp", "==", mdp));
+                const snapshot = await getDocs(q);
+                if (snapshot.size > 0) {
+                    membreId = snapshot.docs[0].id;
+                    membreData = snapshot.docs[0].data();
+                    isAdmin = false;
                 }
             }
 
@@ -333,35 +333,95 @@
         });
 
         async function afficherEdtPersonnel(data) {
-            edtMembreNom.textContent = currentIsAdmin ? "Mode Admin" : data.nom;
-            edtPersonnelContainer.innerHTML = "";
+    const surnom = MEMBRES_DATA.find(m => m.id === currentMembreId)?.surnom || data.nom;
+    edtMembreNom.textContent = currentIsAdmin ? "Mode Admin" : surnom;
+    edtPersonnelContainer.innerHTML = "";
 
-            const table = document.createElement("table");
-            table.className = "edt-perso-table";
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.alignItems = "flex-start";
+    wrapper.style.gap = "20px";
+    wrapper.style.justifyContent = "center";
 
-            const thead = document.createElement("thead");
-            const headerRow = document.createElement("tr");
-            headerRow.appendChild(createTh("Membre"));
-            for (const jour of JOURS) {
-                const label = jour.charAt(0).toUpperCase() + jour.slice(1);
-                headerRow.appendChild(createTh(label));
-            }
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
+    // Left: welcome message
+    const left = document.createElement("div");
+    left.style.minWidth = "120px";
+    left.style.textAlign = "left";
+    left.style.paddingTop = "30px";
+    const welcome = document.createElement("div");
+    welcome.style.fontSize = "1.2rem";
+    welcome.style.fontWeight = "bold";
+    welcome.textContent = currentIsAdmin ? "Bienvenue Admin" : "Bienvenue " + (surnom || data.nom);
+    left.appendChild(welcome);
 
-            const tbody = document.createElement("tbody");
+    // Center: table
+    const center = document.createElement("div");
+    const table = document.createElement("table");
+    table.className = "edt-perso-table";
 
-            if (currentIsAdmin) {
-                for (const m of MEMBRES_DATA) {
-                    tbody.appendChild(await createMembreRow(m.id, m.nom));
-                }
-            } else {
-                tbody.appendChild(await createMembreRow(currentMembreId, data.nom));
-            }
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    headerRow.appendChild(createTh(""));
+    for (const jour of JOURS) {
+        headerRow.appendChild(createTh(jour.charAt(0).toUpperCase() + jour.slice(1, 3)));
+    }
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
 
-            table.appendChild(tbody);
-            edtPersonnelContainer.appendChild(table);
+    const tbody = document.createElement("tbody");
+    if (currentIsAdmin) {
+        for (const m of MEMBRES_DATA) {
+            tbody.appendChild(await createMembreRow(m.id, m.surnom || m.nom));
         }
+    } else {
+        tbody.appendChild(await createMembreRow(currentMembreId, surnom || data.nom));
+    }
+    table.appendChild(tbody);
+    center.appendChild(table);
+
+    // Right: legend
+    const right = document.createElement("div");
+    right.style.minWidth = "140px";
+    right.style.textAlign = "left";
+    right.style.paddingTop = "30px";
+    const legendTitle = document.createElement("div");
+    legendTitle.style.fontWeight = "bold";
+    legendTitle.style.marginBottom = "10px";
+    legendTitle.textContent = "L\u00e9gende";
+    right.appendChild(legendTitle);
+
+    const legendItems = [
+        { value: "absent_reponse", label: "Pas de r\u00e9ponse", color: "#666" },
+        { value: "present", label: "Pr\u00e9sent", color: "#4CAF50" },
+        { value: "absent", label: "Absent", color: "#f44336" },
+        { value: "contrainte_horaire", label: "Avec contrainte", color: "#FF9800" },
+        { value: "abstention", label: "S'abstenir", color: "#9C27B0" }
+    ];
+
+    for (const item of legendItems) {
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.marginBottom = "6px";
+        row.style.fontSize = "0.85rem";
+        const dot = document.createElement("span");
+        dot.style.width = "14px";
+        dot.style.height = "14px";
+        dot.style.borderRadius = "50%";
+        dot.style.display = "inline-block";
+        dot.style.marginRight = "8px";
+        dot.style.background = item.color;
+        dot.style.flexShrink = "0";
+        row.appendChild(dot);
+        row.appendChild(document.createTextNode(item.label));
+        right.appendChild(row);
+    }
+
+    wrapper.appendChild(left);
+    wrapper.appendChild(center);
+    wrapper.appendChild(right);
+    edtPersonnelContainer.appendChild(wrapper);
+}
 
         function createTh(text) {
             const th = document.createElement("th");
@@ -369,85 +429,146 @@
             return th;
         }
 
-        async function createMembreRow(membreId, nom) {
+        async function createMembreRow(membreId, surnom) {
             const tr = document.createElement("tr");
             const tdNom = document.createElement("td");
-            tdNom.textContent = nom;
+            tdNom.textContent = surnom;
             tdNom.style.fontWeight = "bold";
+            tdNom.style.fontSize = "0.9rem";
             tr.appendChild(tdNom);
 
-            // Load EDT data once for this member
             let edtData = null;
             try {
                 const snap = await getDoc(doc(db, "membres", membreId));
-                if (snap.exists()) {
-                    edtData = snap.data().edt || {};
-                }
+                if (snap.exists()) edtData = snap.data().edt || {};
             } catch (e) {
                 console.error("Erreur chargement", membreId, e);
             }
 
             for (const jour of JOURS) {
                 const td = document.createElement("td");
+                td.style.padding = "6px";
 
-                const select = document.createElement("select");
-                select.className = "edt-select";
-                select.dataset.membreId = membreId;
-                select.dataset.jour = jour;
+                const dotContainer = document.createElement("div");
+                dotContainer.style.position = "relative";
+                dotContainer.style.display = "inline-block";
 
-                for (const s of STATUTS) {
-                    const opt = document.createElement("option");
-                    opt.value = s.value;
-                    opt.textContent = s.label;
-                    select.appendChild(opt);
+                const dot = document.createElement("div");
+                dot.style.width = "24px";
+                dot.style.height = "24px";
+                dot.style.borderRadius = "50%";
+                dot.style.cursor = "pointer";
+                dot.style.border = "2px solid rgba(255,255,255,0.3)";
+                dot.style.transition = "transform 0.2s";
+                dot.dataset.membreId = membreId;
+                dot.dataset.jour = jour;
+
+                const statutActuel = edtData?.[jour]?.statut || "absent_reponse";
+                const contrainteActuelle = edtData?.[jour]?.contrainte || "";
+                dot.dataset.value = statutActuel;
+                dot.dataset.contrainte = contrainteActuelle;
+                dot.style.background = getColorForStatut(statutActuel);
+
+                dot.addEventListener("mouseenter", () => { dot.style.transform = "scale(1.2)"; });
+                dot.addEventListener("mouseleave", () => { dot.style.transform = "scale(1)"; });
+
+                // Dropdown menu
+                const dropdown = document.createElement("div");
+                dropdown.style.display = "none";
+                dropdown.style.position = "absolute";
+                dropdown.style.top = "30px";
+                dropdown.style.left = "50%";
+                dropdown.style.transform = "translateX(-50%)";
+                dropdown.style.background = "#333";
+                dropdown.style.borderRadius = "6px";
+                dropdown.style.padding = "4px 0";
+                dropdown.style.zIndex = "10";
+                dropdown.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+                dropdown.style.minWidth = "40px";
+
+                const colors = [
+                    { value: "absent_reponse", color: "#666" },
+                    { value: "present", color: "#4CAF50" },
+                    { value: "absent", color: "#f44336" },
+                    { value: "contrainte_horaire", color: "#FF9800" },
+                    { value: "abstention", color: "#9C27B0" }
+                ];
+
+                for (const c of colors) {
+                    const opt = document.createElement("div");
+                    opt.style.width = "28px";
+                    opt.style.height = "28px";
+                    opt.style.borderRadius = "50%";
+                    opt.style.background = c.color;
+                    opt.style.margin = "4px auto";
+                    opt.style.cursor = "pointer";
+                    opt.style.border = "2px solid transparent";
+                    opt.dataset.value = c.value;
+                    opt.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        selectStatut(membreId, jour, c.value, dot, dropdown);
+                    });
+                    opt.addEventListener("mouseenter", () => { opt.style.borderColor = "#fff"; });
+                    opt.addEventListener("mouseleave", () => { opt.style.borderColor = "transparent"; });
+                    dropdown.appendChild(opt);
                 }
 
-                select.addEventListener("change", () => onEdtChange(membreId, jour));
-                td.appendChild(select);
+                dot.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const allDropdowns = document.querySelectorAll(".statut-dropdown");
+                    allDropdowns.forEach(d => d.style.display = "none");
+                    dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+                });
 
+                dotContainer.appendChild(dot);
+                dotContainer.appendChild(dropdown);
+                td.appendChild(dotContainer);
+
+                // Contrainte input (hidden by default)
                 const contrainteInput = document.createElement("input");
                 contrainteInput.type = "text";
                 contrainteInput.className = "contrainte-input";
                 contrainteInput.dataset.membreId = membreId;
                 contrainteInput.dataset.jour = jour;
-                contrainteInput.placeholder = "Contrainte...";
-                contrainteInput.style.display = "none";
-                contrainteInput.addEventListener("input", () => onEdtChange(membreId, jour));
+                contrainteInput.placeholder = "...";
+                contrainteInput.value = contrainteActuelle;
+                contrainteInput.style.display = (statutActuel === "contrainte_horaire" || statutActuel === "abstention") ? "block" : "none";
+                contrainteInput.style.marginTop = "4px";
+                contrainteInput.addEventListener("input", () => sauvegarderEdt(membreId));
                 td.appendChild(contrainteInput);
-
-                // Pre-remplir depuis Firestore
-                const jourData = edtData?.[jour];
-                if (jourData) {
-                    select.value = jourData.statut || "absent_reponse";
-                    if (jourData.contrainte) contrainteInput.value = jourData.contrainte;
-                }
-                updateCellDisplay(select, contrainteInput);
 
                 tr.appendChild(td);
             }
-
             return tr;
         }
 
-        function onEdtChange(membreId, jour) {
-            const td = document.querySelector(`.edt-select[data-membre-id="${membreId}"][data-jour="${jour}"]`)?.closest("td");
-            if (!td) return;
-            const select = td.querySelector(".edt-select");
-            const contrainteInput = td.querySelector(".contrainte-input");
-            updateCellDisplay(select, contrainteInput);
-            sauvegarderEdt(membreId);
+        function getColorForStatut(statut) {
+            const map = {
+                absent_reponse: "#666",
+                present: "#4CAF50",
+                absent: "#f44336",
+                contrainte_horaire: "#FF9800",
+                abstention: "#9C27B0"
+            };
+            return map[statut] || "#666";
         }
 
-        function updateCellDisplay(select, contrainteInput) {
-            const val = select.value;
-            select.className = "edt-select";
-            select.classList.add("statut-" + val);
-            if (val === "contrainte_horaire" || val === "abstention") {
+        function selectStatut(membreId, jour, value, dot, dropdown) {
+            dot.dataset.value = value;
+            dot.style.background = getColorForStatut(value);
+            dropdown.style.display = "none";
+            const td = dot.closest("td");
+            const contrainteInput = td.querySelector(".contrainte-input");
+            if (value === "contrainte_horaire" || value === "abstention") {
                 contrainteInput.style.display = "block";
-                contrainteInput.placeholder = val === "contrainte_horaire" ? "Arrive \u00e0..." : "Contrainte...";
+                contrainteInput.placeholder = value === "contrainte_horaire" ? "Arrive \u00e0..." : "Contrainte...";
             } else {
                 contrainteInput.style.display = "none";
             }
+            sauvegarderEdt(membreId);
+        }
+
+            return tr;
         }
 
         let saveTimeout = null;
@@ -458,12 +579,12 @@
             saveTimeout = setTimeout(async () => {
                 const edt = {};
                 for (const jour of JOURS) {
-                    const select = document.querySelector(`.edt-select[data-membre-id="${membreId}"][data-jour="${jour}"]`);
-                    if (!select) continue;
-                    const td = select.closest("td");
+                    const dot = document.querySelector(`div[data-membre-id="${membreId}"][data-jour="${jour}"]`);
+                    if (!dot) continue;
+                    const td = dot.closest("td");
                     const contrainteInput = td.querySelector(".contrainte-input");
                     edt[jour] = {
-                        statut: select.value,
+                        statut: dot.dataset.value || "absent_reponse",
                         contrainte: contrainteInput.style.display !== "none" ? contrainteInput.value : ""
                     };
                 }
