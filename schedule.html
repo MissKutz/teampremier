@@ -307,6 +307,53 @@
             return y + "-" + m + "-" + d; 
         }
 
+        function getSurnom(id) {
+            const m = MEMBRES_DATA.find(x => x.id === id);
+            return m ? (m.surnom || m.nom) : id;
+        }
+
+        function validerContrainteHoraire(jour, contrainte) {
+            const cal = CALENDRIER[JOURS.indexOf(jour)];
+            const m = contrainte.match(/(\d{1,2})h(\d{2})?/);
+            if (!m) return true;
+            const hour = parseInt(m[1]);
+            const startHour = parseInt(cal.horaire.split("h")[0]);
+            const endHour = parseInt(cal.horaire.split("-")[1]);
+            return hour >= startHour && hour < endHour;
+        }
+
+        function getGameInfo(weekKey, membres, jourIndex) {
+            const jour = JOURS[jourIndex];
+            const cal = CALENDRIER[jourIndex];
+            if (cal.type === "off") return { time: "Rien", players: "" };
+            const candidates = [];
+            for (const membre of membres) {
+                const semaineEdt = membre.edt?.[weekKey] || {};
+                const statut = semaineEdt[jour]?.statut || "absent_reponse";
+                const contrainte = semaineEdt[jour]?.contrainte || "";
+                if (statut === "present") candidates.push({ surnom: getSurnom(membre.id), priority: 0, contrainte });
+                else if (statut === "contrainte_horaire") candidates.push({ surnom: getSurnom(membre.id), priority: 1, contrainte });
+                else if (statut === "abstention") candidates.push({ surnom: getSurnom(membre.id), priority: 2, contrainte });
+            }
+            candidates.sort((a, b) => a.priority - b.priority);
+            const selected = candidates.slice(0, 5);
+            let time = cal.horaire;
+            for (const s of selected) {
+                if (s.priority === 1 && s.contrainte) {
+                    const m = s.contrainte.match(/(\d{1,2})h(\d{2})?/);
+                    if (m) {
+                        const hour = parseInt(m[1]);
+                        const minute = m[2] ? parseInt(m[2]) : 0;
+                        const endHour = parseInt(cal.horaire.split("-")[1]);
+                        time = hour + "h" + (minute > 0 ? String(minute).padStart(2, "0") : "") + "-" + endHour + "h";
+                        break;
+                    }
+                }
+            }
+            const players = selected.map(s => s.surnom).join(", ");
+            return { time, players };
+        }
+
         async function chargerTableauGeneral() {
             const head = document.getElementById("generalTableHead");
             const tbody = document.getElementById("generalTableBody");
@@ -405,6 +452,38 @@
                     tr.appendChild(td);
                 }
                 tbody.appendChild(tr);
+            }
+
+            // Ligne Game
+            if (membres.length > 0) {
+                const weekKey = getWeekKey(weekOffset);
+                const trGame = document.createElement("tr");
+                const tdGameLabel = document.createElement("td");
+                tdGameLabel.textContent = "Game";
+                tdGameLabel.style.fontWeight = "bold";
+                tdGameLabel.style.background = "rgba(255,255,255,0.05)";
+                trGame.appendChild(tdGameLabel);
+                for (let i = 0; i < 7; i++) {
+                    const td = document.createElement("td");
+                    const cal = CALENDRIER[i];
+                    if (cal.type === "off") {
+                        td.style.background = "rgba(0,0,0,0.12)";
+                        td.textContent = "Rien";
+                        td.style.color = "rgba(255,255,255,0.3)";
+                        td.style.fontSize = "0.75rem";
+                    } else {
+                        const info = getGameInfo(weekKey, membres, i);
+                        if (isPastDay(weekOffset, i)) {
+                            td.style.background = "rgba(0,0,0,0.08)";
+                        }
+                        td.style.fontSize = "0.7rem";
+                        td.style.lineHeight = "1.3";
+                        td.style.padding = "6px";
+                        td.innerHTML = "<div>" + info.time + "</div><div style='font-size:0.65rem;opacity:0.8;'>" + info.players + "</div>";
+                    }
+                    trGame.appendChild(td);
+                }
+                tbody.appendChild(trGame);
             }
         }
 
@@ -850,10 +929,14 @@
                     if (!dot) continue;
                     const td = dot.closest("td");
                     const contrainteInput = td.querySelector(".contrainte-input");
-                    edtSemaine[jour] = {
-                        statut: dot.dataset.value || "absent_reponse",
-                        contrainte: contrainteInput.style.display !== "none" ? contrainteInput.value : ""
-                    };
+                    const statut = dot.dataset.value || "absent_reponse";
+                    const contrainte = contrainteInput.style.display !== "none" ? contrainteInput.value : "";
+                    if (statut === "contrainte_horaire" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
+                        saveIndicator.textContent = "\u274c Heure hors cr\u00e9neau pour " + jour + " !";
+                        setTimeout(() => { saveIndicator.textContent = ""; }, 3000);
+                        return;
+                    }
+                    edtSemaine[jour] = { statut, contrainte };
                 }
                 try {
                     const ref = doc(db, "membres", membreId);
