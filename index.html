@@ -73,19 +73,83 @@
         border: 3px solid #fff;
         border-radius: 10px;
         color: #fff;
+        position: relative;
+        perspective: 1000px;
+        overflow: hidden;
+    }
+
+    .row-4 .square:nth-child(1) .square-front { background: linear-gradient(130deg, #e41717, #000000); }
+    .row-4 .square:nth-child(2) .square-front { background: linear-gradient(130deg, #1788df, #000000); }
+    .row-4 .square:nth-child(3) .square-front { background: linear-gradient(130deg, #ed5a16, #000000); }
+    .row-4 .square:nth-child(4) .square-front { background: linear-gradient(130deg, #1fb924, #000000); }
+    .row-3 .square:nth-child(1) .square-front { background: linear-gradient(130deg, #accd17, #000000); }
+    .row-3 .square:nth-child(2) .square-front { background: linear-gradient(130deg, #a016bf, #000000); }
+    .row-3 .square:nth-child(3) .square-front { background: linear-gradient(130deg, #9b0d52, #000000); }
+
+    .row-4 .square:nth-child(1) .square-back { background: linear-gradient(130deg, #000000, #e41717); }
+    .row-4 .square:nth-child(2) .square-back { background: linear-gradient(130deg, #000000, #1788df); }
+    .row-4 .square:nth-child(3) .square-back { background: linear-gradient(130deg, #000000, #ed5a16); }
+    .row-4 .square:nth-child(4) .square-back { background: linear-gradient(130deg, #000000, #1fb924); }
+    .row-3 .square:nth-child(1) .square-back { background: linear-gradient(130deg, #000000, #accd17); }
+    .row-3 .square:nth-child(2) .square-back { background: linear-gradient(130deg, #000000, #a016bf); }
+    .row-3 .square:nth-child(3) .square-back { background: linear-gradient(130deg, #000000, #9b0d52); }
+
+    .square-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.6s;
+        border-radius: 7px;
+    }
+
+    .square.flipped .square-inner {
+        transform: rotateY(180deg);
+    }
+
+    .square-front, .square-back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        border-radius: 7px;
         padding: 1rem;
         display: flex;
         flex-direction: column;
-        position: relative;
     }
 
-    .row-4 .square:nth-child(1) { background: linear-gradient(130deg, #e41717, #000000); }
-    .row-4 .square:nth-child(2) { background: linear-gradient(130deg, #1788df, #000000); }
-    .row-4 .square:nth-child(3) { background: linear-gradient(130deg, #ed5a16, #000000); }
-    .row-4 .square:nth-child(4) { background: linear-gradient(130deg, #1fb924, #000000); }
-    .row-3 .square:nth-child(1) { background: linear-gradient(130deg, #accd17, #000000); }
-    .row-3 .square:nth-child(2) { background: linear-gradient(130deg, #a016bf, #000000); }
-    .row-3 .square:nth-child(3) { background: linear-gradient(130deg, #9b0d52, #000000); }
+    .square-back {
+        transform: rotateY(180deg);
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .flip-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 10;
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+    }
+
+    .flip-btn:hover {
+        background: rgba(255,255,255,0.4);
+    }
 
     .square-header {
         display: flex;
@@ -123,89 +187,153 @@
 <div class="squares">
     <div class="row-4">
             <div class="square">
-        <div class="square-header">
-            <span class="square-title">Morgane</span>
+    <div class="square-inner">
+        <div class="square-front">
+            <div class="square-header">
+                <span class="square-title" style="font-family: 'EB Garamond';">Morgane</span>
+            </div>
+            <ul class="square-links" style="font-family: 'EB Garamond';">
+                <li>- Valorant: MissKutz #519</li>
+                <li>- Discord</li>
+                <li>- Instagram</li>
+            </ul>
         </div>
-        <ul class="square-links">
-            <li>- Valorant: MissKutz #519</li>
-            <li>- Discord</li>
-            <li>- Instagram</li>
-        </ul>
+        <div class="square-back">
+            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">Morgane</span>
+        </div>
     </div>
+    <button class="flip-btn">↻</button>
+</div>
 
-        <div class="square">
-        <div class="square-header">
-            <span class="square-title">Enzo</span>
+    <div class="square">
+    <div class="square-inner">
+        <div class="square-front">
+            <div class="square-header">
+                <span class="square-title" style="font-family: 'EB Garamond';">Enzo</span>
+            </div>
+            <ul class="square-links" style="font-family: 'EB Garamond';">
+                <li>- Valorant: Misu #773</li>
+                <li>- Discord</li>
+                <li>- Instagram</li>
+            </ul>
         </div>
-        <ul class="square-links">
-            <li>- Valorant: Misu #773</li>
-            <li>- Discord</li>
-            <li>- Instagram</li>
-        </ul>
+        <div class="square-back">
+            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">Enzo</span>
+        </div>
     </div>
+    <button class="flip-btn">↻</button>
+</div>
 
-        <div class="square">
-        <div class="square-header">
-            <span class="square-title">Jules</span>
+    <div class="square">
+    <div class="square-inner">
+        <div class="square-front">
+            <div class="square-header">
+                <span class="square-title" style="font-family: 'EB Garamond';">Jules</span>
+            </div>
+            <ul class="square-links" style="font-family: 'EB Garamond';">
+                <li>- Valorant</li>
+                <li>- Discord</li>
+                <li>- Instagram</li>
+            </ul>
         </div>
-        <ul class="square-links">
-            <li>- Valorant</li>
-            <li>- Discord</li>
-            <li>- Instagram</li>
-        </ul>
+        <div class="square-back">
+            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">Jules</span>
+        </div>
     </div>
+    <button class="flip-btn">↻</button>
+</div>
 
-        <div class="square">
-        <div class="square-header">
-            <span class="square-title">Seb</span>
+    <div class="square">
+    <div class="square-inner">
+        <div class="square-front">
+            <div class="square-header">
+                <span class="square-title" style="font-family: 'EB Garamond';">Seb</span>
+            </div>
+            <ul class="square-links" style="font-family: 'EB Garamond';">
+                <li>- Valorant: Pollux #PoPo</li>
+                <li>- Discord</li>
+                <li>- Instagram</li>
+            </ul>
         </div>
-        <ul class="square-links">
-            <li>- Valorant: Pollux #PoPo</li>
-            <li>- Discord</li>
-            <li>- Instagram</li>
-        </ul>
+        <div class="square-back">
+            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">Seb</span>
+        </div>
     </div>
+    <button class="flip-btn">↻</button>
+</div>
 </div>
 
 <div class="row-3">
         <div class="square">
-        <div class="square-header">
-            <span class="square-title">Orphée</span>
+    <div class="square-inner">
+        <div class="square-front">
+            <div class="square-header">
+                <span class="square-title" style="font-family: 'EB Garamond';">Orphée</span>
+            </div>
+            <ul class="square-links" style="font-family: 'EB Garamond';">
+                <li>- Valorant: Innocent man #</li>
+                <li>- Discord</li>
+                <li>- Instagram</li>
+            </ul>
         </div>
-        <ul class="square-links">
-            <li>- Valorant: Innocent man #</li>
-            <li>- Discord</li>
-            <li>- Instagram</li>
-        </ul>
+        <div class="square-back">
+            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">Orphée</span>
+        </div>
     </div>
+    <button class="flip-btn">↻</button>
+</div>
 
-        <div class="square">
-        <div class="square-header">
-            <span class="square-title">Octave</span>
+    <div class="square">
+    <div class="square-inner">
+        <div class="square-front">
+            <div class="square-header">
+                <span class="square-title" style="font-family: 'EB Garamond';">Octave</span>
+            </div>
+            <ul class="square-links" style="font-family: 'EB Garamond';">
+                <li>- Valorant</li>
+                <li>- Discord</li>
+                <li>- Instagram</li>
+            </ul>
         </div>
-        <ul class="square-links">
-            <li>- Valorant</li>
-            <li>- Discord</li>
-            <li>- Instagram</li>
-        </ul>
-    </div>  
-
-        <div class="square">
-        <div class="square-header">
-            <span class="square-title">Clément</span>
+        <div class="square-back">
+            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">Octave</span>
         </div>
-        <ul class="square-links">
-            <li>- Valorant: Clemrsse #2609</li>
-            <li>- Discord</li>
-            <li>- Instagram</li>
-        </ul>
     </div>
+    <button class="flip-btn">↻</button>
+</div>  
+
+    <div class="square">
+    <div class="square-inner">
+        <div class="square-front">
+            <div class="square-header">
+                <span class="square-title" style="font-family: 'EB Garamond';">Clément</span>
+            </div>
+            <ul class="square-links" style="font-family: 'EB Garamond';">
+                <li>- Valorant: Clemrsse #2609</li>
+                <li>- Discord</li>
+                <li>- Instagram</li>
+            </ul>
+        </div>
+        <div class="square-back">
+            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">Clément</span>
+        </div>
+    </div>
+    <button class="flip-btn">↻</button>
+</div>
 </div>
 </div>
 
     <div class="footer-btn">
         <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
     </div>
+    <script>
+  document.querySelector('.squares').addEventListener('click', function(e) {
+    const btn = e.target.closest('.flip-btn');
+    if (btn) {
+      btn.parentElement.classList.toggle('flipped');
+    }
+  });
+</script>
     <script type="module">
   // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
