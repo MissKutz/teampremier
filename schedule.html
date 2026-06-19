@@ -217,6 +217,7 @@
         ];
 
         let weekOffset = 0;
+        let rouletteSelections = {};
 
         async function seedFirestore() {
             try {
@@ -325,36 +326,76 @@
         function getGameInfo(weekKey, membres, jourIndex) {
             const jour = JOURS[jourIndex];
             const cal = CALENDRIER[jourIndex];
-            if (cal.type === "off") return { time: "Rien", players: "" };
-            const candidates = [];
+            if (cal.type === "off") return { time: "Rien", players: "", count: 0, cancelled: false, needsRoulette: false, dayAbbr: "" };
+            const greens = [], oranges = [], violets = [];
             for (const membre of membres) {
                 const semaineEdt = membre.edt?.[weekKey] || {};
                 const statut = semaineEdt[jour]?.statut || "absent_reponse";
                 const contrainte = semaineEdt[jour]?.contrainte || "";
-                if (statut === "present") candidates.push({ surnom: getSurnom(membre.id), priority: 0, contrainte });
-                else if (statut === "contrainte_horaire") candidates.push({ surnom: getSurnom(membre.id), priority: 1, contrainte });
-                else if (statut === "abstention") candidates.push({ surnom: getSurnom(membre.id), priority: 2, contrainte });
+                if (statut === "present") greens.push({ surnom: getSurnom(membre.id), contrainte });
+                else if (statut === "contrainte_horaire") oranges.push({ surnom: getSurnom(membre.id), contrainte });
+                else if (statut === "abstention") violets.push({ surnom: getSurnom(membre.id), contrainte });
             }
-            candidates.sort((a, b) => a.priority - b.priority);
-            const selected = candidates.slice(0, 5);
-            let time = cal.horaire;
-            for (const s of selected) {
-                if (s.priority === 1 && s.contrainte) {
-                    const m = s.contrainte.match(/(\d{1,2})h(\d{2})?/);
-                    if (m) {
-                        const hour = parseInt(m[1]);
-                        const minute = m[2] ? parseInt(m[2]) : 0;
-                        const endHour = parseInt(cal.horaire.split("-")[1]);
-                        time = hour + "h" + (minute > 0 ? String(minute).padStart(2, "0") : "") + "-" + endHour + "h";
-                        break;
+            const totalAvailable = greens.length + oranges.length + violets.length;
+            const cancelled = totalAvailable < 5;
+            const needsRoulette = greens.length > 5 && !cancelled;
+            let selected;
+            if (cancelled) {
+                selected = [...greens, ...oranges, ...violets];
+            } else if (needsRoulette) {
+                const key = weekKey + "-" + jour;
+                if (!rouletteSelections[key]) {
+                    const shuffled = [...greens].sort(() => Math.random() - 0.5);
+                    rouletteSelections[key] = shuffled.slice(0, 5).map(s => s.surnom);
+                }
+                selected = rouletteSelections[key].map(name => greens.find(x => x.surnom === name) || { surnom: name, contrainte: "" });
+                if (selected.length < 5) {
+                    const extra = greens.filter(g => !rouletteSelections[key].includes(g.surnom));
+                    selected = [...selected, ...extra.slice(0, 5 - selected.length)];
+                }
+            } else {
+                selected = [...greens, ...oranges, ...violets].slice(0, 5);
+            }
+            const typeLabel = cal.type === "entrainement" ? "entrainement" : "match";
+            const scheduledStart = parseInt(cal.horaire.split("h")[0]);
+            const endHour = parseInt(cal.horaire.split("-")[1]);
+            let timeDisplay;
+            if (cancelled) {
+                timeDisplay = "<s>" + scheduledStart + "h-" + endHour + "h " + typeLabel + "</s> <b>ANNULE</b>";
+            } else {
+                let maxTime = -1;
+                for (const s of selected) {
+                    const o = oranges.find(x => x.surnom === s.surnom);
+                    if (o && o.contrainte) {
+                        const m = o.contrainte.match(/(\d{1,2})h(\d{2})?/);
+                        if (m) {
+                            const total = parseInt(m[1]) * 60 + (m[2] ? parseInt(m[2]) : 0);
+                            if (total > maxTime) maxTime = total;
+                        }
                     }
                 }
+                let startDisplay;
+                if (maxTime >= 0) {
+                    const h = Math.floor(maxTime / 60);
+                    const min = maxTime % 60;
+                    startDisplay = h + "h" + (min > 0 ? String(min).padStart(2, "0") : "");
+                } else {
+                    startDisplay = scheduledStart + "h";
+                }
+                timeDisplay = startDisplay + "-" + endHour + "h " + typeLabel;
             }
-            const players = selected.map(s => s.surnom).join(", ");
-            return { time, players };
+            return {
+                time: timeDisplay,
+                players: selected.map(s => s.surnom).join(", "),
+                count: selected.length,
+                cancelled,
+                needsRoulette,
+                dayAbbr: cal.jour
+            };
         }
 
         async function chargerTableauGeneral() {
+            updateRouletteButtons([]);
             const head = document.getElementById("generalTableHead");
             const tbody = document.getElementById("generalTableBody");
             if (!head || !tbody) return;
@@ -463,6 +504,7 @@
                 tdGameLabel.style.fontWeight = "bold";
                 tdGameLabel.style.background = "rgba(255,255,255,0.05)";
                 trGame.appendChild(tdGameLabel);
+                const rouletteDays = [];
                 for (let i = 0; i < 7; i++) {
                     const td = document.createElement("td");
                     const cal = CALENDRIER[i];
@@ -479,23 +521,25 @@
                         td.style.fontSize = "0.7rem";
                         td.style.lineHeight = "1.3";
                         td.style.padding = "6px";
-                        td.innerHTML = "<div>" + info.time + "</div><div style='font-size:0.65rem;opacity:0.8;'>" + info.players + "</div>";
+                        if (info.needsRoulette) {
+                            rouletteDays.push({ jour: jour, dayAbbr: info.dayAbbr, key: weekKey + "-" + jour });
+                        }
+                        td.innerHTML = "<div>" + info.time + "</div><div style='font-size:0.65rem;opacity:0.8;'>" + info.count + " joueur" + (info.count > 1 ? "s" : "") + " : " + info.players + "</div>";
                     }
                     trGame.appendChild(td);
                 }
                 tbody.appendChild(trGame);
+                updateRouletteButtons(rouletteDays);
             }
         }
 
         function initNavigation() {
-            const navHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;">' +
-                '<button class="btn btn-secondary nav-prev">&#9664;</button>' +
+            const navBase = '<button class="btn btn-secondary nav-prev">&#9664;</button>' +
                 '<span class="week-label" style="font-size:1.1rem;font-weight:bold;min-width:220px;text-align:center;">Semaine du ...</span>' +
                 '<button class="btn btn-secondary nav-next">&#9654;</button>' +
-                '<button class="btn btn-secondary nav-today">Semaine actuelle</button>' +
-                '</div>';
-            document.getElementById("navPerso").innerHTML = navHTML;
-            document.getElementById("navGeneral").innerHTML = navHTML;
+                '<button class="btn btn-secondary nav-today">Semaine actuelle</button>';
+            document.getElementById("navPerso").innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;">' + navBase + '</div>';
+            document.getElementById("navGeneral").innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;"><span id="rouletteZone" style="display:inline-flex;gap:6px;margin-right:5px;"></span>' + navBase + '</div>';
             document.querySelectorAll("#navPerso .nav-prev, #navGeneral .nav-prev")
                 .forEach(b => b.addEventListener("click", () => changeWeek(-1)));
             document.querySelectorAll("#navPerso .nav-next, #navGeneral .nav-next")
@@ -506,13 +550,36 @@
 
         function goToToday() {
             weekOffset = 0;
+            rouletteSelections = {};
             updateWeekLabel();
             chargerTableauGeneral();
             if (currentMembreId) refreshEdtPerso();
         }
 
+        function updateRouletteButtons(days) {
+            const zone = document.getElementById("rouletteZone");
+            if (!zone) return;
+            zone.innerHTML = "";
+            for (const d of days) {
+                const btn = document.createElement("button");
+                btn.className = "btn btn-secondary";
+                btn.style.fontSize = "0.75rem";
+                btn.style.padding = "4px 8px";
+                btn.innerHTML = "&#127922; " + d.dayAbbr;
+                btn.title = "Roulette pour " + d.jour;
+                btn.addEventListener("click", () => rerollRoulette(d.key));
+                zone.appendChild(btn);
+            }
+        }
+
+        function rerollRoulette(key) {
+            delete rouletteSelections[key];
+            chargerTableauGeneral();
+        }
+
         function changeWeek(delta) {
             weekOffset = Math.max(-3, Math.min(7, weekOffset + delta));
+            rouletteSelections = {};
             updateWeekLabel();
             chargerTableauGeneral();
             if (currentMembreId) refreshEdtPerso();
