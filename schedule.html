@@ -448,15 +448,15 @@
             const legendTitle = document.createElement("div");
             legendTitle.style.fontWeight = "bold";
             legendTitle.style.marginBottom = "10px";
-            legendTitle.textContent = "L\u00e9gende";
+            legendTitle.textContent = "Légende";
             right.appendChild(legendTitle);
 
             const legendItems = [
-                { value: "absent_reponse", label: "Pas de r\u00e9ponse", color: "#666" },
-                { value: "present", label: "Pr\u00e9sent", color: "#4CAF50" },
+                { value: "absent_reponse", label: "Pas de réponse", color: "#666" },
+                { value: "present", label: "Présent", color: "#4CAF50" },
                 { value: "absent", label: "Absent", color: "#f44336" },
-                { value: "contrainte_horaire", label: "Avec contrainte", color: "#FF9800" },
-                { value: "abstention", label: "S'abstenir", color: "#9C27B0" }
+                { value: "contrainte_horaire", label: "Présent avec contrainte horaires ", color: "#FF9800" },
+                { value: "abstention", label: "Je suis là mais je joue seulement si c'est vraiment nécessaire", color: "#9C27B0" }
             ];
 
             for (const item of legendItems) {
