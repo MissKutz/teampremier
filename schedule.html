@@ -108,7 +108,7 @@
             background: rgba(255,255,255,0.2);
             font-weight: bold;
         }
-        .contrainte-input {
+        .contrainte-select {
             display: block;
             margin-top: 4px;
             padding: 4px 8px;
@@ -119,9 +119,6 @@
             font-size: 0.75rem;
             width: 100%;
             box-sizing: border-box;
-        }
-        .contrainte-input::placeholder {
-            color: rgba(255,255,255,0.4);
         }
         .save-indicator {
             font-size: 0.85rem;
@@ -995,16 +992,19 @@
                 optionVide.textContent = "...";
                 contrainteSelect.appendChild(optionVide);
                 // Générer les créneaux horaires en fonction du type de match/entrainement
-                const cal = CALENDRIER[jour];
-                const startHour = parseInt(cal.horaire.split("h")[0]);
-                const endHour = parseInt(cal.horaire.split("-")[1]);
-                for (let h = startHour; h < endHour; h++) {
-                    for (let m = 0; m < 60; m += 5) {
-                        const timeStr = h + "h" + (m < 10 ? "0" + m : m);
-                        const option = document.createElement("option");
-                        option.value = timeStr;
-                        option.textContent = timeStr;
-                        contrainteSelect.appendChild(option);
+                const jourIndex = JOURS.indexOf(jour);
+                const cal = CALENDRIER[jourIndex];
+                if (cal.type !== "off") {
+                    const startHour = parseInt(cal.horaire.split("h")[0]);
+                    const endHour = parseInt(cal.horaire.split("-")[1]);
+                    for (let h = startHour; h < endHour; h++) {
+                        for (let m = 0; m < 60; m += 5) {
+                            const timeStr = h + "h" + (m < 10 ? "0" + m : m);
+                            const option = document.createElement("option");
+                            option.value = timeStr;
+                            option.textContent = timeStr;
+                            contrainteSelect.appendChild(option);
+                        }
                     }
                 }
                 contrainteSelect.value = contrainteActuelle;
@@ -1032,12 +1032,11 @@
             dot.style.background = getColorForStatut(value);
             dropdown.style.display = "none";
             const td = dot.closest("td");
-            const contrainteInput = td.querySelector(".contrainte-input");
+            const contrainteSelect = td.querySelector(".contrainte-select");
             if (value === "contrainte_horaire" || value === "abstention") {
-                contrainteInput.style.display = "block";
-                contrainteInput.placeholder = value === "contrainte_horaire" ? "Arrive \u00e0..." : "Contrainte...";
+                contrainteSelect.style.display = "block";
             } else {
-                contrainteInput.style.display = "none";
+                contrainteSelect.style.display = "none";
             }
             sauvegarderEdt(membreId);
         }
@@ -1049,9 +1048,9 @@
                 const dot = document.querySelector(`div[data-membre-id="${membreId}"][data-jour="${jour}"]`);
                 if (!dot) continue;
                 const td = dot.closest("td");
-                const contrainteInput = td.querySelector(".contrainte-input");
+                const contrainteSelect = td.querySelector(".contrainte-select");
                 const statut = dot.dataset.value || "absent_reponse";
-                const contrainte = contrainteInput.style.display !== "none" ? contrainteInput.value : "";
+                const contrainte = contrainteSelect.style.display !== "none" ? contrainteSelect.value : "";
                 if (statut === "contrainte_horaire" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
                     saveIndicator.textContent = "\u274c Heure hors cr\u00e9neau pour " + jour + " !";
                     setTimeout(() => { saveIndicator.textContent = ""; }, 3000);
