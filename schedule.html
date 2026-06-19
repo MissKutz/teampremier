@@ -353,10 +353,24 @@
                     const jour = JOURS[i];
                     const cal = CALENDRIER[i];
 
-                    if (cal.type === "off" || isPastDay(weekOffset, i)) {
+                    if (cal.type === "off") {
                         td.style.background = "rgba(0,0,0,0.12)";
                         td.textContent = "\u2014";
                         td.style.color = "rgba(255,255,255,0.3)";
+                    } else if (isPastDay(weekOffset, i)) {
+                        td.style.background = "rgba(0,0,0,0.12)";
+                        const weekKey = getWeekKey(weekOffset);
+                        const semaineEdt = membre.edt?.[weekKey] || {};
+                        const statut = semaineEdt[jour]?.statut || "absent_reponse";
+                        const dot = document.createElement("div");
+                        dot.style.width = "20px";
+                        dot.style.height = "20px";
+                        dot.style.borderRadius = "50%";
+                        dot.style.margin = "0 auto";
+                        dot.style.background = getColorForStatut(statut);
+                        dot.style.border = "2px solid rgba(255,255,255,0.1)";
+                        dot.style.opacity = "0.35";
+                        td.appendChild(dot);
                     } else {
                         const weekKey = getWeekKey(weekOffset);
                         const semaineEdt = membre.edt?.[weekKey] || {};
@@ -652,10 +666,25 @@
             for (let i = 0; i < JOURS.length; i++) {
                 const td = document.createElement("td");
                 const jour = JOURS[i];
-                if (jour === "lundi" || jour === "mardi" || isPastDay(weekOffset, i)) {
+                if (jour === "lundi" || jour === "mardi") {
                     td.style.background = "rgba(0,0,0,0.12)";
                     td.textContent = "\u2014";
                     td.style.color = "rgba(255,255,255,0.3)";
+                    tr.appendChild(td);
+                    continue;
+                }
+                if (isPastDay(weekOffset, i)) {
+                    td.style.background = "rgba(0,0,0,0.12)";
+                    const statutActuel = edtData?.[jour]?.statut || "absent_reponse";
+                    const dot = document.createElement("div");
+                    dot.style.width = "24px";
+                    dot.style.height = "24px";
+                    dot.style.borderRadius = "50%";
+                    dot.style.margin = "0 auto";
+                    dot.style.background = getColorForStatut(statutActuel);
+                    dot.style.border = "2px solid rgba(255,255,255,0.1)";
+                    dot.style.opacity = "0.35";
+                    td.appendChild(dot);
                     tr.appendChild(td);
                     continue;
                 }
