@@ -217,6 +217,7 @@
         ];
 
         let weekOffset = 0;
+        let rouletteSelections = {};
 
         async function seedFirestore() {
             try {
@@ -307,7 +308,94 @@
             return y + "-" + m + "-" + d; 
         }
 
+        function getSurnom(id) {
+            const m = MEMBRES_DATA.find(x => x.id === id);
+            return m ? (m.surnom || m.nom) : id;
+        }
+
+        function validerContrainteHoraire(jour, contrainte) {
+            const cal = CALENDRIER[JOURS.indexOf(jour)];
+            const m = contrainte.match(/(\d{1,2})h(\d{2})?/);
+            if (!m) return true;
+            const hour = parseInt(m[1]);
+            const startHour = parseInt(cal.horaire.split("h")[0]);
+            const endHour = parseInt(cal.horaire.split("-")[1]);
+            return hour >= startHour && hour < endHour;
+        }
+
+        function getGameInfo(weekKey, membres, jourIndex) {
+            const jour = JOURS[jourIndex];
+            const cal = CALENDRIER[jourIndex];
+            if (cal.type === "off") return { time: "Rien", players: "", count: 0, cancelled: false, needsRoulette: false, dayAbbr: "" };
+            const greens = [], oranges = [], violets = [];
+            for (const membre of membres) {
+                const semaineEdt = membre.edt?.[weekKey] || {};
+                const statut = semaineEdt[jour]?.statut || "absent_reponse";
+                const contrainte = semaineEdt[jour]?.contrainte || "";
+                if (statut === "present") greens.push({ surnom: getSurnom(membre.id), contrainte });
+                else if (statut === "contrainte_horaire") oranges.push({ surnom: getSurnom(membre.id), contrainte });
+                else if (statut === "abstention") violets.push({ surnom: getSurnom(membre.id), contrainte });
+            }
+            const totalAvailable = greens.length + oranges.length + violets.length;
+            const cancelled = totalAvailable < 5;
+            const needsRoulette = greens.length > 5 && !cancelled;
+            let selected;
+            if (cancelled) {
+                selected = [...greens, ...oranges, ...violets];
+            } else if (needsRoulette) {
+                const key = weekKey + "-" + jour;
+                if (!rouletteSelections[key]) {
+                    const shuffled = [...greens].sort(() => Math.random() - 0.5);
+                    rouletteSelections[key] = shuffled.slice(0, 5).map(s => s.surnom);
+                }
+                selected = rouletteSelections[key].map(name => greens.find(x => x.surnom === name) || { surnom: name, contrainte: "" });
+                if (selected.length < 5) {
+                    const extra = greens.filter(g => !rouletteSelections[key].includes(g.surnom));
+                    selected = [...selected, ...extra.slice(0, 5 - selected.length)];
+                }
+            } else {
+                selected = [...greens, ...oranges, ...violets].slice(0, 5);
+            }
+            const typeLabel = cal.type === "entrainement" ? "entrainement" : "match";
+            const scheduledStart = parseInt(cal.horaire.split("h")[0]);
+            const endHour = parseInt(cal.horaire.split("-")[1]);
+            let timeDisplay;
+            if (cancelled) {
+                timeDisplay = "<s>" + scheduledStart + "h-" + endHour + "h " + typeLabel + "</s> <b>ANNULE</b>";
+            } else {
+                let maxTime = -1;
+                for (const s of selected) {
+                    const o = oranges.find(x => x.surnom === s.surnom);
+                    if (o && o.contrainte) {
+                        const m = o.contrainte.match(/(\d{1,2})h(\d{2})?/);
+                        if (m) {
+                            const total = parseInt(m[1]) * 60 + (m[2] ? parseInt(m[2]) : 0);
+                            if (total > maxTime) maxTime = total;
+                        }
+                    }
+                }
+                let startDisplay;
+                if (maxTime >= 0) {
+                    const h = Math.floor(maxTime / 60);
+                    const min = maxTime % 60;
+                    startDisplay = h + "h" + (min > 0 ? String(min).padStart(2, "0") : "");
+                } else {
+                    startDisplay = scheduledStart + "h";
+                }
+                timeDisplay = startDisplay + "-" + endHour + "h " + typeLabel;
+            }
+            return {
+                time: timeDisplay,
+                players: selected.map(s => s.surnom).join(", "),
+                count: selected.length,
+                cancelled,
+                needsRoulette,
+                dayAbbr: cal.jour
+            };
+        }
+
         async function chargerTableauGeneral() {
+            updateRouletteButtons([]);
             const head = document.getElementById("generalTableHead");
             const tbody = document.getElementById("generalTableBody");
             if (!head || !tbody) return;
@@ -362,6 +450,7 @@
                         const weekKey = getWeekKey(weekOffset);
                         const semaineEdt = membre.edt?.[weekKey] || {};
                         const statut = semaineEdt[jour]?.statut || "absent_reponse";
+                        const contrainte = semaineEdt[jour]?.contrainte || "";
                         const dot = document.createElement("div");
                         dot.style.width = "20px";
                         dot.style.height = "20px";
@@ -371,10 +460,19 @@
                         dot.style.border = "2px solid rgba(255,255,255,0.1)";
                         dot.style.opacity = "0.35";
                         td.appendChild(dot);
+                        if ((statut === "contrainte_horaire" || statut === "abstention") && contrainte) {
+                            const label = document.createElement("div");
+                            label.style.fontSize = "0.6rem";
+                            label.style.color = "rgba(255,255,255,0.5)";
+                            label.style.marginTop = "2px";
+                            label.textContent = contrainte;
+                            td.appendChild(label);
+                        }
                     } else {
                         const weekKey = getWeekKey(weekOffset);
                         const semaineEdt = membre.edt?.[weekKey] || {};
                         const statut = semaineEdt[jour]?.statut || "absent_reponse";
+                        const contrainte = semaineEdt[jour]?.contrainte || "";
                         const dot = document.createElement("div");
                         dot.style.width = "20px";
                         dot.style.height = "20px";
@@ -383,22 +481,65 @@
                         dot.style.background = getColorForStatut(statut);
                         dot.style.border = "2px solid rgba(255,255,255,0.3)";
                         td.appendChild(dot);
+                        if ((statut === "contrainte_horaire" || statut === "abstention") && contrainte) {
+                            const label = document.createElement("div");
+                            label.style.fontSize = "0.6rem";
+                            label.style.color = "rgba(255,255,255,0.6)";
+                            label.style.marginTop = "2px";
+                            label.textContent = contrainte;
+                            td.appendChild(label);
+                        }
                     }
                     tr.appendChild(td);
                 }
                 tbody.appendChild(tr);
             }
+
+            // Ligne Game
+            if (membres.length > 0) {
+                const weekKey = getWeekKey(weekOffset);
+                const trGame = document.createElement("tr");
+                const tdGameLabel = document.createElement("td");
+                tdGameLabel.textContent = "Game";
+                tdGameLabel.style.fontWeight = "bold";
+                tdGameLabel.style.background = "rgba(255,255,255,0.05)";
+                trGame.appendChild(tdGameLabel);
+                const rouletteDays = [];
+                for (let i = 0; i < 7; i++) {
+                    const td = document.createElement("td");
+                    const cal = CALENDRIER[i];
+                    if (cal.type === "off") {
+                        td.style.background = "rgba(0,0,0,0.12)";
+                        td.textContent = "Rien";
+                        td.style.color = "rgba(255,255,255,0.3)";
+                        td.style.fontSize = "0.75rem";
+                    } else {
+                        const info = getGameInfo(weekKey, membres, i);
+                        if (isPastDay(weekOffset, i)) {
+                            td.style.background = "rgba(0,0,0,0.08)";
+                        }
+                        td.style.fontSize = "0.7rem";
+                        td.style.lineHeight = "1.3";
+                        td.style.padding = "6px";
+                        if (info.needsRoulette) {
+                            rouletteDays.push({ jour: jour, dayAbbr: info.dayAbbr, key: weekKey + "-" + jour });
+                        }
+                        td.innerHTML = "<div>" + info.time + "</div><div style='font-size:0.65rem;opacity:0.8;'>" + info.count + " joueur" + (info.count > 1 ? "s" : "") + " : " + info.players + "</div>";
+                    }
+                    trGame.appendChild(td);
+                }
+                tbody.appendChild(trGame);
+                updateRouletteButtons(rouletteDays);
+            }
         }
 
         function initNavigation() {
-            const navHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;">' +
-                '<button class="btn btn-secondary nav-prev">&#9664;</button>' +
+            const navBase = '<button class="btn btn-secondary nav-prev">&#9664;</button>' +
                 '<span class="week-label" style="font-size:1.1rem;font-weight:bold;min-width:220px;text-align:center;">Semaine du ...</span>' +
                 '<button class="btn btn-secondary nav-next">&#9654;</button>' +
-                '<button class="btn btn-secondary nav-today">Semaine actuelle</button>' +
-                '</div>';
-            document.getElementById("navPerso").innerHTML = navHTML;
-            document.getElementById("navGeneral").innerHTML = navHTML;
+                '<button class="btn btn-secondary nav-today">Semaine actuelle</button>';
+            document.getElementById("navPerso").innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;">' + navBase + '</div>';
+            document.getElementById("navGeneral").innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;"><span id="rouletteZone" style="display:inline-flex;gap:6px;margin-right:5px;"></span>' + navBase + '</div>';
             document.querySelectorAll("#navPerso .nav-prev, #navGeneral .nav-prev")
                 .forEach(b => b.addEventListener("click", () => changeWeek(-1)));
             document.querySelectorAll("#navPerso .nav-next, #navGeneral .nav-next")
@@ -409,13 +550,36 @@
 
         function goToToday() {
             weekOffset = 0;
+            rouletteSelections = {};
             updateWeekLabel();
             chargerTableauGeneral();
             if (currentMembreId) refreshEdtPerso();
         }
 
+        function updateRouletteButtons(days) {
+            const zone = document.getElementById("rouletteZone");
+            if (!zone) return;
+            zone.innerHTML = "";
+            for (const d of days) {
+                const btn = document.createElement("button");
+                btn.className = "btn btn-secondary";
+                btn.style.fontSize = "0.75rem";
+                btn.style.padding = "4px 8px";
+                btn.innerHTML = "&#127922; " + d.dayAbbr;
+                btn.title = "Roulette pour " + d.jour;
+                btn.addEventListener("click", () => rerollRoulette(d.key));
+                zone.appendChild(btn);
+            }
+        }
+
+        function rerollRoulette(key) {
+            delete rouletteSelections[key];
+            chargerTableauGeneral();
+        }
+
         function changeWeek(delta) {
-            weekOffset = Math.max(-3, Math.min(3, weekOffset + delta));
+            weekOffset = Math.max(-3, Math.min(7, weekOffset + delta));
+            rouletteSelections = {};
             updateWeekLabel();
             chargerTableauGeneral();
             if (currentMembreId) refreshEdtPerso();
@@ -832,10 +996,14 @@
                     if (!dot) continue;
                     const td = dot.closest("td");
                     const contrainteInput = td.querySelector(".contrainte-input");
-                    edtSemaine[jour] = {
-                        statut: dot.dataset.value || "absent_reponse",
-                        contrainte: contrainteInput.style.display !== "none" ? contrainteInput.value : ""
-                    };
+                    const statut = dot.dataset.value || "absent_reponse";
+                    const contrainte = contrainteInput.style.display !== "none" ? contrainteInput.value : "";
+                    if (statut === "contrainte_horaire" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
+                        saveIndicator.textContent = "\u274c Heure hors cr\u00e9neau pour " + jour + " !";
+                        setTimeout(() => { saveIndicator.textContent = ""; }, 3000);
+                        return;
+                    }
+                    edtSemaine[jour] = { statut, contrainte };
                 }
                 try {
                     const ref = doc(db, "membres", membreId);
