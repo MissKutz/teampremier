@@ -11,11 +11,11 @@
             padding: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
             background: linear-gradient(100deg, #000000, #764ba2, #7c3b68);
             color: #fff;
-        }
+            }
         .container {
             text-align: center;
             padding: 2rem;
@@ -28,12 +28,29 @@
             font-size: 1.2rem;
             opacity: 0.9;
         }
+
+        .back-btn {
+        background:linear-gradient(100deg, #7c3b68, #000000, #764ba2);
+        color: white;
+        border: 2px solid #000000;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .back-btn:hover {
+        opacity: 0.7;
+    }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Team Premier</h1>
         <p>Plastic4ever #plouf</p>
+        <div="text-align:center;">
+            <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
     </div>
     <script type="module">
   // Import the functions you need from the SDKs you need
@@ -54,8 +71,6 @@
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
 </script>
-        <div style="text-align:center;">
-            <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
-        </div>
+        
 </body>
 </html>
