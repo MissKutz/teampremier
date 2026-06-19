@@ -22,6 +22,11 @@
             font-size: 2.5rem;
             margin-bottom: 2rem;
         }
+        h2 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 0 0 1rem 0;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -41,93 +46,437 @@
         td {
             min-height: 60px;
         }
-        .back-btn {
+        .back-btn, .btn {
             display: inline-block;
-            margin-top: 2rem;
+            margin: 0.5rem;
             padding: 10px 20px;
             background: rgba(255,255,255,0.2);
             color: #fff;
             text-decoration: none;
             border-radius: 5px;
             transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
         }
-        .back-btn:hover {
+        .back-btn:hover, .btn:hover {
             background: rgba(255,255,255,0.3);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        #authZone {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        #mdpInput {
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+            margin-right: 10px;
+            width: 200px;
+        }
+        #mdpInput::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        #loginError {
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+
+        .edt-perso-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .edt-perso-table th,
+        .edt-perso-table td {
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px;
+            text-align: center;
+        }
+        .edt-perso-table th {
+            background: rgba(255,255,255,0.2);
+            font-weight: bold;
+        }
+        .edt-select {
+            width: 100%;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #fff;
+        }
+        .statut-absent_reponse { background: #666; }
+        .statut-present { background: #4CAF50; }
+        .statut-absent { background: #f44336; }
+        .statut-contrainte_horaire { background: #FF9800; }
+        .statut-abstention { background: #9C27B0; }
+
+        .contrainte-input {
+            display: block;
+            margin-top: 4px;
+            padding: 4px 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 0.75rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .contrainte-input::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+        .save-indicator {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <div style="text-align:center;">
-        <a class="back-btn">Modifier votre présence</a>
-    </div>
-        <div class="container">
-            <h1>Emploi du Temps</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Membres</th>
-                        <th>Lundi</th>
-                        <th>Mardi</th>
-                        <th>Mercredi</th>
-                        <th>Jeudi</th>
-                        <th>Vendredi</th>
-                        <th>Samedi</th>
-                        <th>Dimanche</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Morgane</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                    <tr>
-                        <td>Enzo</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                    <tr>
-                        <td>Jules</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td> 
-                    </tr>
-                    <tr>
-                        <td>Sébastien</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                    <tr>
-                        <td>Orphée</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                    <tr>
-                        <td>Octave</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                    <tr>
-                        <td>Clément</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div style="text-align:center;">
-            <a href="index.html" class="back-btn">Retour à l'accueil</a>
+    <div id="authZone">
+        <div id="stateButton">
+            <button class="btn" id="btnModifier">Modifier votre présence</button>
+        </div>
+        <div id="stateLogin" style="display:none;">
+            <input type="password" id="mdpInput" placeholder="Mot de passe">
+            <button class="btn" id="btnValider">Valider</button>
+            <button class="btn btn-secondary" id="btnFermerLogin">Fermer</button>
+            <p id="loginError"></p>
+        </div>
+        <div id="stateEdt" style="display:none;">
+            <h2>EDT de <span id="edtMembreNom"></span></h2>
+            <div id="edtPersonnelContainer"></div>
+            <div style="margin-top:15px;">
+                <span class="save-indicator" id="saveIndicator"></span>
+                <button class="btn btn-secondary" id="btnDeconnexion">Se d&eacute;connecter</button>
             </div>
         </div>
-        <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    </div>
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBTkuOD4jnR3tvmkAxKR5UM0nB6RNqWC1M",
-    authDomain: "premierteam-plouf.firebaseapp.com",
-    projectId: "premierteam-plouf",
-    storageBucket: "premierteam-plouf.firebasestorage.app",
-    messagingSenderId: "511246296521",
-    appId: "1:511246296521:web:2f4b07c682ee25dd6d3418"
-  };
+    <div class="container">
+        <h1>Emploi du Temps</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Membres</th>
+                    <th>Lundi</th>
+                    <th>Mardi</th>
+                    <th>Mercredi</th>
+                    <th>Jeudi</th>
+                    <th>Vendredi</th>
+                    <th>Samedi</th>
+                    <th>Dimanche</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Morgane</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Enzo</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Jules</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>S&eacute;bastien</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Orph&eacute;e</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Octave</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Cl&eacute;ment</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            </tbody>
+        </table>
+        <div style="text-align:center;">
+            <a href="index.html" class="back-btn">Retour &agrave; l'accueil</a>
+        </div>
+    </div>
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getFirestore, collection, doc, getDocs, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTkuOD4jnR3tvmkAxKR5UM0nB6RNqWC1M",
+            authDomain: "premierteam-plouf.firebaseapp.com",
+            projectId: "premierteam-plouf",
+            storageBucket: "premierteam-plouf.firebasestorage.app",
+            messagingSenderId: "511246296521",
+            appId: "1:511246296521:web:2f4b07c682ee25dd6d3418"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+        const STATUTS = [
+            { value: "absent_reponse", label: "Pas de r\u00e9ponse" },
+            { value: "present", label: "Pr\u00e9sent" },
+            { value: "absent", label: "Absent" },
+            { value: "contrainte_horaire", label: "Pr\u00e9sent avec contrainte horaire" },
+            { value: "abstention", label: "Pr\u00e9sent mais s'abstenir" }
+        ];
+
+        const MEMBRES_DATA = [
+            { id: "morgane", nom: "Morgane", mdp: "14022019", mdp_admin: "Admin_mk_11", estAdmin: true },
+            { id: "enzo", nom: "Enzo", mdp: "2323", mdp_admin: "Enzo_misu_12", estAdmin: true },
+            { id: "jules", nom: "Jules", mdp: "julesf0128", estAdmin: false },
+            { id: "sebastien", nom: "S\u00e9bastien", mdp: "Honda06+", estAdmin: false },
+            { id: "orphee", nom: "Orph\u00e9e", mdp: "jemeraivoiralexiaenrobedechambre69", estAdmin: false },
+            { id: "octave", nom: "Octave", mdp: "motdepasse.1", estAdmin: false },
+            { id: "clement", nom: "Cl\u00e9ment", mdp: "clemrsse123", estAdmin: false }
+        ];
+
+        async function seedFirestore() {
+            try {
+                const snapshot = await getDocs(collection(db, "membres"));
+                if (snapshot.size > 0) return;
+
+                for (const m of MEMBRES_DATA) {
+                    const edt = {};
+                    for (const jour of JOURS) {
+                        edt[jour] = { statut: "absent_reponse", contrainte: "" };
+                    }
+                    await setDoc(doc(db, "membres", m.id), {
+                        nom: m.nom,
+                        mdp: m.mdp,
+                        ...(m.mdp_admin ? { mdp_admin: m.mdp_admin } : {}),
+                        estAdmin: m.estAdmin,
+                        edt
+                    });
+                }
+                console.log("Firestore peupl\u00e9 avec les 7 membres");
+            } catch (e) {
+                console.error("Erreur seed Firestore :", e);
+            }
+        }
+        seedFirestore();
+
+        const stateButton = document.getElementById("stateButton");
+        const stateLogin = document.getElementById("stateLogin");
+        const stateEdt = document.getElementById("stateEdt");
+        const btnModifier = document.getElementById("btnModifier");
+        const btnValider = document.getElementById("btnValider");
+        const btnFermerLogin = document.getElementById("btnFermerLogin");
+        const btnDeconnexion = document.getElementById("btnDeconnexion");
+        const mdpInput = document.getElementById("mdpInput");
+        const loginError = document.getElementById("loginError");
+        const edtMembreNom = document.getElementById("edtMembreNom");
+        const edtPersonnelContainer = document.getElementById("edtPersonnelContainer");
+        const saveIndicator = document.getElementById("saveIndicator");
+
+        let currentMembreId = null;
+        let currentIsAdmin = false;
+
+        function showState(state) {
+            stateButton.style.display = "none";
+            stateLogin.style.display = "none";
+            stateEdt.style.display = "none";
+            if (state === "button") stateButton.style.display = "block";
+            else if (state === "login") stateLogin.style.display = "block";
+            else if (state === "edt") stateEdt.style.display = "block";
+        }
+
+        btnModifier.addEventListener("click", () => {
+            mdpInput.value = "";
+            loginError.textContent = "";
+            showState("login");
+        });
+
+        btnFermerLogin.addEventListener("click", () => showState("button"));
+        btnDeconnexion.addEventListener("click", () => {
+            currentMembreId = null;
+            currentIsAdmin = false;
+            showState("button");
+        });
+
+        btnValider.addEventListener("click", async () => {
+            const mdp = mdpInput.value.trim();
+            if (!mdp) return;
+
+            const q = query(collection(db, "membres"), where("mdp", "==", mdp));
+            const snapshot = await getDocs(q);
+
+            let membreId = null;
+            let membreData = null;
+            let isAdmin = false;
+
+            if (snapshot.size > 0) {
+                membreId = snapshot.docs[0].id;
+                membreData = snapshot.docs[0].data();
+                isAdmin = membreData.estAdmin === true;
+            } else {
+                const qAdmin = query(collection(db, "membres"), where("mdp_admin", "==", mdp));
+                const adminSnapshot = await getDocs(qAdmin);
+                if (adminSnapshot.size > 0) {
+                    membreId = adminSnapshot.docs[0].id;
+                    membreData = adminSnapshot.docs[0].data();
+                    isAdmin = true;
+                }
+            }
+
+            if (!membreId) {
+                loginError.textContent = "Mot de passe incorrect";
+                return;
+            }
+
+            currentMembreId = membreId;
+            currentIsAdmin = isAdmin;
+            loginError.textContent = "";
+            afficherEdtPersonnel(membreData);
+            showState("edt");
+        });
+
+        async function afficherEdtPersonnel(data) {
+            edtMembreNom.textContent = currentIsAdmin ? "Mode Admin" : data.nom;
+            edtPersonnelContainer.innerHTML = "";
+
+            const table = document.createElement("table");
+            table.className = "edt-perso-table";
+
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            headerRow.appendChild(createTh("Membre"));
+            for (const jour of JOURS) {
+                const label = jour.charAt(0).toUpperCase() + jour.slice(1);
+                headerRow.appendChild(createTh(label));
+            }
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+
+            if (currentIsAdmin) {
+                for (const m of MEMBRES_DATA) {
+                    tbody.appendChild(await createMembreRow(m.id, m.nom));
+                }
+            } else {
+                tbody.appendChild(await createMembreRow(currentMembreId, data.nom));
+            }
+
+            table.appendChild(tbody);
+            edtPersonnelContainer.appendChild(table);
+        }
+
+        function createTh(text) {
+            const th = document.createElement("th");
+            th.textContent = text;
+            return th;
+        }
+
+        async function createMembreRow(membreId, nom) {
+            const tr = document.createElement("tr");
+            const tdNom = document.createElement("td");
+            tdNom.textContent = nom;
+            tdNom.style.fontWeight = "bold";
+            tr.appendChild(tdNom);
+
+            // Load EDT data once for this member
+            let edtData = null;
+            try {
+                const snap = await getDoc(doc(db, "membres", membreId));
+                if (snap.exists()) {
+                    edtData = snap.data().edt || {};
+                }
+            } catch (e) {
+                console.error("Erreur chargement", membreId, e);
+            }
+
+            for (const jour of JOURS) {
+                const td = document.createElement("td");
+
+                const select = document.createElement("select");
+                select.className = "edt-select";
+                select.dataset.membreId = membreId;
+                select.dataset.jour = jour;
+
+                for (const s of STATUTS) {
+                    const opt = document.createElement("option");
+                    opt.value = s.value;
+                    opt.textContent = s.label;
+                    select.appendChild(opt);
+                }
+
+                select.addEventListener("change", () => onEdtChange(membreId, jour));
+                td.appendChild(select);
+
+                const contrainteInput = document.createElement("input");
+                contrainteInput.type = "text";
+                contrainteInput.className = "contrainte-input";
+                contrainteInput.dataset.membreId = membreId;
+                contrainteInput.dataset.jour = jour;
+                contrainteInput.placeholder = "Contrainte...";
+                contrainteInput.style.display = "none";
+                contrainteInput.addEventListener("input", () => onEdtChange(membreId, jour));
+                td.appendChild(contrainteInput);
+
+                // Pre-remplir depuis Firestore
+                const jourData = edtData?.[jour];
+                if (jourData) {
+                    select.value = jourData.statut || "absent_reponse";
+                    if (jourData.contrainte) contrainteInput.value = jourData.contrainte;
+                }
+                updateCellDisplay(select, contrainteInput);
+
+                tr.appendChild(td);
+            }
+
+            return tr;
+        }
+
+        function onEdtChange(membreId, jour) {
+            const td = document.querySelector(`.edt-select[data-membre-id="${membreId}"][data-jour="${jour}"]`)?.closest("td");
+            if (!td) return;
+            const select = td.querySelector(".edt-select");
+            const contrainteInput = td.querySelector(".contrainte-input");
+            updateCellDisplay(select, contrainteInput);
+            sauvegarderEdt(membreId);
+        }
+
+        function updateCellDisplay(select, contrainteInput) {
+            const val = select.value;
+            select.className = "edt-select";
+            select.classList.add("statut-" + val);
+            if (val === "contrainte_horaire" || val === "abstention") {
+                contrainteInput.style.display = "block";
+                contrainteInput.placeholder = val === "contrainte_horaire" ? "Arrive \u00e0..." : "Contrainte...";
+            } else {
+                contrainteInput.style.display = "none";
+            }
+        }
+
+        let saveTimeout = null;
+
+        async function sauvegarderEdt(membreId) {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveIndicator.textContent = "Sauvegarde...";
+            saveTimeout = setTimeout(async () => {
+                const edt = {};
+                for (const jour of JOURS) {
+                    const select = document.querySelector(`.edt-select[data-membre-id="${membreId}"][data-jour="${jour}"]`);
+                    if (!select) continue;
+                    const td = select.closest("td");
+                    const contrainteInput = td.querySelector(".contrainte-input");
+                    edt[jour] = {
+                        statut: select.value,
+                        contrainte: contrainteInput.style.display !== "none" ? contrainteInput.value : ""
+                    };
+                }
+                try {
+                    await setDoc(doc(db, "membres", membreId), { edt }, { merge: true });
+                    saveIndicator.textContent = "Sauvegard\u00e9 \u2713";
+                    setTimeout(() => { saveIndicator.textContent = ""; }, 2000);
+                } catch (e) {
+                    saveIndicator.textContent = "Erreur de sauvegarde";
+                    console.error("Erreur sauvegarde", e);
+                }
+            }, 500);
+        }
+    </script>
 </body>
 </html>
