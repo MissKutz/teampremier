@@ -130,6 +130,91 @@
         justify-content: center;
         align-items: center;
         text-align: center;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .square-back img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 7px;
+    }
+
+    .agent-toggle {
+        z-index: 15;
+        background: rgba(255,255,255,0.25);
+        border: none;
+        color: #fff;
+        font-size: 0.9rem;
+        cursor: pointer;
+        width: 24px;
+        height: 28px;
+        border-radius: 0 6px 6px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+        padding: 0;
+        flex-shrink: 0;
+    }
+
+    .agent-toggle:hover {
+        background: rgba(255,255,255,0.45);
+    }
+
+    .agent-panel {
+        position: absolute;
+        top: 8px;
+        left: 0;
+        z-index: 12;
+        display: flex;
+        align-items: center;
+    }
+
+    .agent-choices {
+        display: none;
+        align-items: center;
+        gap: 4px;
+        background: rgba(0,0,0,0.7);
+        padding: 4px 8px;
+        border-radius: 0 6px 6px 0;
+        font-size: 0.8rem;
+        margin-left: 2px;
+        white-space: nowrap;
+    }
+
+    .agent-choices.open {
+        display: flex;
+    }
+
+    .agent-choices span {
+        margin-right: 4px;
+    }
+
+    .agent-opt {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: #fff;
+        cursor: pointer;
+        width: 26px;
+        height: 26px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+
+    .agent-opt:hover {
+        background: rgba(255,255,255,0.35);
+    }
+
+    .agent-opt.selected {
+        background: rgba(255,255,255,0.5);
+        border-color: #fff;
+        font-weight: bold;
     }
 
     .flip-btn {
@@ -199,6 +284,68 @@
         opacity: 0.6;
     }
 
+    .agent-default-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 7px;
+    }
+
+    .agent-split {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        flex-direction: column;
+        z-index: 1;
+        border-radius: 7px;
+        overflow: hidden;
+    }
+
+    .agent-split-part {
+        flex: 1;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .agent-inputs {
+        position: absolute;
+        top: 36px;
+        left: 6px;
+        right: 6px;
+        z-index: 15;
+        display: none;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .agent-inputs.visible {
+        display: flex;
+    }
+
+    .agent-input {
+        background: rgba(0,0,0,0.75);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: #fff;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .agent-input:focus {
+        border-color: #fff;
+    }
+
+    .agent-input.error {
+        border-color: #ff4444;
+    }
+
  </style>
 </head>
 <body>
@@ -223,7 +370,23 @@
             </ul>
         </div>
         <div class="square-back">
-            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">main valo</span>
+            <img src="img/agents/agent_8.png" class="agent-default-img">
+            <div class="agent-split"></div>
+            <div class="agent-inputs">
+                <input type="text" class="agent-input" placeholder="Agent 1...">
+                <input type="text" class="agent-input" placeholder="Agent 2...">
+                <input type="text" class="agent-input" placeholder="Agent 3...">
+            </div>
+            <div class="agent-panel">
+                <button class="agent-toggle">▶</button>
+                <div class="agent-choices">
+                    <span>Agents :</span>
+                    <button class="agent-opt" data-value="0">0</button>
+                    <button class="agent-opt" data-value="1">1</button>
+                    <button class="agent-opt" data-value="2">2</button>
+                    <button class="agent-opt" data-value="3">3</button>
+                </div>
+            </div>
         </div>
     </div>
     <button class="flip-btn">↻</button>
@@ -242,7 +405,23 @@
             </ul>
         </div>
         <div class="square-back">
-            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">main valo</span>
+            <img src="img/agents/agent_8.png" class="agent-default-img">
+            <div class="agent-split"></div>
+            <div class="agent-inputs">
+                <input type="text" class="agent-input" placeholder="Agent 1...">
+                <input type="text" class="agent-input" placeholder="Agent 2...">
+                <input type="text" class="agent-input" placeholder="Agent 3...">
+            </div>
+            <div class="agent-panel">
+                <button class="agent-toggle">▶</button>
+                <div class="agent-choices">
+                    <span>Agents :</span>
+                    <button class="agent-opt" data-value="0">0</button>
+                    <button class="agent-opt" data-value="1">1</button>
+                    <button class="agent-opt" data-value="2">2</button>
+                    <button class="agent-opt" data-value="3">3</button>
+                </div>
+            </div>
         </div>
     </div>
     <button class="flip-btn">↻</button>
@@ -261,7 +440,23 @@
             </ul>
         </div>
         <div class="square-back">
-            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">main valo</span>
+            <img src="img/agents/agent_8.png" class="agent-default-img">
+            <div class="agent-split"></div>
+            <div class="agent-inputs">
+                <input type="text" class="agent-input" placeholder="Agent 1...">
+                <input type="text" class="agent-input" placeholder="Agent 2...">
+                <input type="text" class="agent-input" placeholder="Agent 3...">
+            </div>
+            <div class="agent-panel">
+                <button class="agent-toggle">▶</button>
+                <div class="agent-choices">
+                    <span>Agents :</span>
+                    <button class="agent-opt" data-value="0">0</button>
+                    <button class="agent-opt" data-value="1">1</button>
+                    <button class="agent-opt" data-value="2">2</button>
+                    <button class="agent-opt" data-value="3">3</button>
+                </div>
+            </div>
         </div>
     </div>
     <button class="flip-btn">↻</button>
@@ -280,7 +475,23 @@
             </ul>
         </div>
         <div class="square-back">
-            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">main valo</span>
+            <img src="img/agents/agent_8.png" class="agent-default-img">
+            <div class="agent-split"></div>
+            <div class="agent-inputs">
+                <input type="text" class="agent-input" placeholder="Agent 1...">
+                <input type="text" class="agent-input" placeholder="Agent 2...">
+                <input type="text" class="agent-input" placeholder="Agent 3...">
+            </div>
+            <div class="agent-panel">
+                <button class="agent-toggle">▶</button>
+                <div class="agent-choices">
+                    <span>Agents :</span>
+                    <button class="agent-opt" data-value="0">0</button>
+                    <button class="agent-opt" data-value="1">1</button>
+                    <button class="agent-opt" data-value="2">2</button>
+                    <button class="agent-opt" data-value="3">3</button>
+                </div>
+            </div>
         </div>
     </div>
     <button class="flip-btn">↻</button>
@@ -301,7 +512,23 @@
             </ul>
         </div>
         <div class="square-back">
-            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">main valo</span>
+            <img src="img/agents/agent_8.png" class="agent-default-img">
+            <div class="agent-split"></div>
+            <div class="agent-inputs">
+                <input type="text" class="agent-input" placeholder="Agent 1...">
+                <input type="text" class="agent-input" placeholder="Agent 2...">
+                <input type="text" class="agent-input" placeholder="Agent 3...">
+            </div>
+            <div class="agent-panel">
+                <button class="agent-toggle">▶</button>
+                <div class="agent-choices">
+                    <span>Agents :</span>
+                    <button class="agent-opt" data-value="0">0</button>
+                    <button class="agent-opt" data-value="1">1</button>
+                    <button class="agent-opt" data-value="2">2</button>
+                    <button class="agent-opt" data-value="3">3</button>
+                </div>
+            </div>
         </div>
     </div>
     <button class="flip-btn">↻</button>
@@ -320,7 +547,23 @@
             </ul>
         </div>
         <div class="square-back">
-            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">main valo</span>
+            <img src="img/agents/agent_8.png" class="agent-default-img">
+            <div class="agent-split"></div>
+            <div class="agent-inputs">
+                <input type="text" class="agent-input" placeholder="Agent 1...">
+                <input type="text" class="agent-input" placeholder="Agent 2...">
+                <input type="text" class="agent-input" placeholder="Agent 3...">
+            </div>
+            <div class="agent-panel">
+                <button class="agent-toggle">▶</button>
+                <div class="agent-choices">
+                    <span>Agents :</span>
+                    <button class="agent-opt" data-value="0">0</button>
+                    <button class="agent-opt" data-value="1">1</button>
+                    <button class="agent-opt" data-value="2">2</button>
+                    <button class="agent-opt" data-value="3">3</button>
+                </div>
+            </div>
         </div>
     </div>
     <button class="flip-btn">↻</button>
@@ -339,7 +582,23 @@
             </ul>
         </div>
         <div class="square-back">
-            <span style="font-size: 1.5rem; font-family: 'EB Garamond';">main valo</span>
+            <img src="img/agents/agent_8.png" class="agent-default-img">
+            <div class="agent-split"></div>
+            <div class="agent-inputs">
+                <input type="text" class="agent-input" placeholder="Agent 1...">
+                <input type="text" class="agent-input" placeholder="Agent 2...">
+                <input type="text" class="agent-input" placeholder="Agent 3...">
+            </div>
+            <div class="agent-panel">
+                <button class="agent-toggle">▶</button>
+                <div class="agent-choices">
+                    <span>Agents :</span>
+                    <button class="agent-opt" data-value="0">0</button>
+                    <button class="agent-opt" data-value="1">1</button>
+                    <button class="agent-opt" data-value="2">2</button>
+                    <button class="agent-opt" data-value="3">3</button>
+                </div>
+            </div>
         </div>
     </div>
     <button class="flip-btn">↻</button>
@@ -354,12 +613,184 @@
 
 
     <script>
+  const agentImages = {
+    'astra': 'img/agents/astra.jpg',
+    'breach': 'img/agents/breach.jpg',
+    'brimstone': 'img/agents/brimstone.jpg',
+    'chamber': 'img/agents/chamber.jpg',
+    'clove': 'img/agents/clove.jpg',
+    'cypher': 'img/agents/cypher.jpg',
+    'deadlock': 'img/agents/deadlock.jpg',
+    'fade': 'img/agents/fade.jpg',
+    'gekko': 'img/agents/gekko.jpg',
+    'harbor': 'img/agents/harbor.jpg',
+    'iso': 'img/agents/iso.jpg',
+    'jett': 'img/agents/jett.jpg',
+    'kayo': 'img/agents/kayo.jpg',
+    'killjoy': 'img/agents/killjoy.jpg',
+    'miks': 'img/agents/miks.jpg',
+    'neon': 'img/agents/néon.jpg',
+    'néon': 'img/agents/néon.jpg',
+    'omen': 'img/agents/omen.jpg',
+    'phoenix': 'img/agents/phoenix.jpg',
+    'raze': 'img/agents/raze.jpg',
+    'reyna': 'img/agents/reyna.jpg',
+    'sage': 'img/agents/sage.jpg',
+    'skye': 'img/agents/skye.jpg',
+    'sova': 'img/agents/sova.jpg',
+    'tejo': 'img/agents/tejo.jpg',
+    'veto': 'img/agents/veto.jpg',
+    'viper': 'img/agents/viper.jpg',
+    'vyse': 'img/agents/vyse.jpg',
+    'waylay': 'img/agents/waylay.jpg',
+    'yoru': 'img/agents/yoru.jpg'
+  };
+
+  function getMemberName(square) {
+    return square.querySelector('.square-title').textContent.trim();
+  }
+
+  function getConfig(square) {
+    const opt = square.querySelector('.agent-opt.selected');
+    const count = opt ? parseInt(opt.dataset.value) : 0;
+    const inputs = square.querySelectorAll('.agent-input');
+    const agents = [];
+    inputs.forEach((input, i) => {
+      if (i < count) {
+        agents.push(input.value.trim().toLowerCase());
+      } else {
+        agents.push('');
+      }
+    });
+    return { count, agents };
+  }
+
+  function saveConfig(square) {
+    const name = getMemberName(square);
+    const config = getConfig(square);
+    localStorage.setItem('agentConfig-' + name, JSON.stringify(config));
+  }
+
+  function renderSplit(square, config) {
+    const { count, agents } = config;
+    const img = square.querySelector('.agent-default-img');
+    const split = square.querySelector('.agent-split');
+    const inputs = square.querySelector('.agent-inputs');
+    const inputFields = inputs.querySelectorAll('.agent-input');
+
+    if (count === 0) {
+      inputs.classList.remove('visible');
+      img.src = 'img/agents/agent_8.png';
+      img.style.display = 'block';
+      split.innerHTML = '';
+      split.style.display = 'none';
+      return;
+    }
+
+    inputs.classList.add('visible');
+    inputFields.forEach((input, i) => {
+      input.style.display = i < count ? 'block' : 'none';
+      if (i < count && agents[i]) input.value = agents[i];
+      else if (i >= count) input.value = '';
+    });
+
+    const validAgents = agents.slice(0, count).map(a => a && agentImages[a] ? a : null);
+    const hasAll = validAgents.every(a => a !== null);
+
+    if (!hasAll || validAgents.length === 0) {
+      img.style.display = 'block';
+      img.src = 'img/agents/agent_8.png';
+      split.innerHTML = '';
+      split.style.display = 'none';
+      return;
+    }
+
+    img.style.display = 'none';
+    split.innerHTML = validAgents.map(a =>
+      `<div class="agent-split-part" style="background-image:url('${agentImages[a]}')"></div>`
+    ).join('');
+    split.style.display = 'flex';
+  }
+
+  function updateFromInput(input) {
+    const square = input.closest('.square');
+    const val = input.value.trim().toLowerCase();
+    if (!val) return;
+    if (agentImages[val]) {
+      input.classList.remove('error');
+    } else {
+      input.classList.add('error');
+      return;
+    }
+    const config = getConfig(square);
+    const index = Array.from(input.parentElement.querySelectorAll('.agent-input')).indexOf(input);
+    config.agents[index] = val;
+    renderSplit(square, config);
+    saveConfig(square);
+  }
+
+  function handleOptClick(opt) {
+    const square = opt.closest('.square');
+    const val = parseInt(opt.dataset.value);
+
+    opt.parentElement.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    setTimeout(() => opt.closest('.agent-choices').classList.remove('open'), 600);
+
+    const config = { count: val, agents: ['', '', ''] };
+    renderSplit(square, config);
+    saveConfig(square);
+  }
+
+  function restoreSaved() {
+    document.querySelectorAll('.square').forEach(square => {
+      const name = getMemberName(square);
+      const saved = localStorage.getItem('agentConfig-' + name);
+      if (saved) {
+        try {
+          const config = JSON.parse(saved);
+          const opt = square.querySelector(`.agent-opt[data-value="${config.count}"]`);
+          if (opt) {
+            square.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+          }
+          renderSplit(square, config);
+        } catch (e) {}
+      }
+    });
+  }
+
   document.querySelector('.squares').addEventListener('click', function(e) {
     const btn = e.target.closest('.flip-btn');
     if (btn) {
       btn.parentElement.classList.toggle('flipped');
     }
+    const toggle = e.target.closest('.agent-toggle');
+    if (toggle) {
+      const choices = toggle.parentElement.querySelector('.agent-choices');
+      choices.classList.toggle('open');
+    }
+    const opt = e.target.closest('.agent-opt');
+    if (opt) {
+      handleOptClick(opt);
+    }
   });
+
+  document.querySelector('.squares').addEventListener('keydown', function(e) {
+    const input = e.target.closest('.agent-input');
+    if (input && e.key === 'Enter') {
+      updateFromInput(input);
+    }
+  });
+
+  document.querySelector('.squares').addEventListener('focusout', function(e) {
+    const input = e.target.closest('.agent-input');
+    if (input) {
+      updateFromInput(input);
+    }
+  });
+
+  restoreSaved();
 </script>
     <script type="module">
   // Import the functions you need from the SDKs you need
