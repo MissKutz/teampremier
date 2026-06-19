@@ -109,21 +109,6 @@
             background: rgba(255,255,255,0.2);
             font-weight: bold;
         }
-        .edt-select {
-            width: 100%;
-            padding: 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.3);
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: #fff;
-        }
-        .statut-absent_reponse { background: #666; }
-        .statut-present { background: #4CAF50; }
-        .statut-absent { background: #f44336; }
-        .statut-contrainte_horaire { background: #FF9800; }
-        .statut-abstention { background: #9C27B0; }
-
         .contrainte-input {
             display: block;
             margin-top: 4px;
@@ -170,28 +155,17 @@
     <div class="container">
         <h1>Emploi du Temps</h1>
         <table>
-            <thead>
-                <tr>
-                    <th>Membres</th>
-                    <th>Lundi</th>
-                    <th>Mardi</th>
-                    <th>Mercredi</th>
-                    <th>Jeudi</th>
-                    <th>Vendredi</th>
-                    <th>Samedi</th>
-                    <th>Dimanche</th>
-                </tr>
+            <thead id="generalTableHead">
+                <!-- Généré par JS -->
             </thead>
-            <tbody>
-                <tr><td>Morgane</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Enzo</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Jules</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Sébastien</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Orphée</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Octave</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Clément</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tbody id="generalTableBody">
+                <!-- Généré par JS -->
             </tbody>
         </table>
+        <div id="calendrierInfos" style="margin-top:15px; text-align:center; font-size:0.95rem; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px;">
+            <span style="color:#4CAF50; font-weight:bold;">Match</span> : jeudi, samedi, dimanche &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span style="color:#FF9800; font-weight:bold;">Entraînement</span> : mercredi, vendredi
+        </div>
         <div style="text-align:center;">
             <a href="index.html" class="back-btn">Retour à l'accueil</a>
         </div>
@@ -214,13 +188,16 @@
         const db = getFirestore(app);
 
         const JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
-        const STATUTS = [
-            { value: "absent_reponse", label: "Pas de réponse" },
-            { value: "present", label: "Présent" },
-            { value: "absent", label: "Absent" },
-            { value: "contrainte_horaire", label: "Présent avec contrainte horaire" },
-            { value: "abstention", label: "Présent mais s'abstenir" }
+        const CALENDRIER = [
+            { jour: "Lu", horaire: "&mdash;", type: "off" },
+            { jour: "Ma", horaire: "&mdash;", type: "off" },
+            { jour: "Me", horaire: "19h-20h", type: "entrainement" },
+            { jour: "Je", horaire: "19h-20h", type: "match" },
+            { jour: "Ve", horaire: "20h-21h", type: "entrainement" },
+            { jour: "Sa", horaire: "20h-21h", type: "match" },
+            { jour: "Di", horaire: "19h-20h", type: "match" }
         ];
+        const NOMS_JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
         const MEMBRES_DATA = [
             { id: "morgane", nom: "Morgane", surnom: "MK", mdp: "14022019", mdp_admin: "Admin_mk_11" },
@@ -228,7 +205,7 @@
             { id: "jules", nom: "Jules", surnom: "FDM", mdp: "julesf0128" },
             { id: "sebastien", nom: "Sébastien", surnom: "Pollux", mdp: "Honda06+" },
             { id: "orphee", nom: "Orphée", surnom: "Orphée", mdp: "jemeraivoiralexiaenrobedechambre69" },
-            { id: "octave", nom: "Octave", surnom: "SacadUwU", mdp: "motdepasse.1" },
+            { id: "octave", nom: "Octave", surnom: "sacadUwU", mdp: "motdepasse.1" },
             { id: "clement", nom: "Clément", surnom: "Clemrsse", mdp: "clemrsse123" }
         ];
 
@@ -255,6 +232,93 @@
             }
         }
         seedFirestore();
+
+        function getWeekDates() {
+            const now = new Date();
+            const day = now.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + diff);
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const dd = String(d.getDate()).padStart(2, "0");
+                const mm = String(d.getMonth() + 1).padStart(2, "0");
+                dates.push(dd + "/" + mm);
+            }
+            return dates;
+        }
+
+        async function chargerTableauGeneral() {
+            const head = document.getElementById("generalTableHead");
+            const tbody = document.getElementById("generalTableBody");
+            if (!head || !tbody) return;
+
+            const weekDates = getWeekDates();
+
+            // En-tête : 3 lignes
+            head.innerHTML = "";
+            const lignes = [NOMS_JOURS, weekDates, CALENDRIER.map(c => c.horaire)];
+            for (let ligneIdx = 0; ligneIdx < 3; ligneIdx++) {
+                const tr = document.createElement("tr");
+                const thLabel = document.createElement("th");
+                thLabel.textContent = ligneIdx === 0 ? "Membres" : "";
+                tr.appendChild(thLabel);
+                for (let i = 0; i < 7; i++) {
+                    const th = document.createElement("th");
+                    if (CALENDRIER[i].type === "off") {
+                        th.style.background = "rgba(0,0,0,0.15)";
+                        th.style.color = "rgba(255,255,255,0.4)";
+                    }
+                    th.innerHTML = lignes[ligneIdx][i];
+                    th.style.fontSize = ligneIdx === 2 ? "0.8rem" : "";
+                    th.style.fontWeight = ligneIdx === 2 ? "normal" : "";
+                    tr.appendChild(th);
+                }
+                head.appendChild(tr);
+            }
+
+            // Corps
+            tbody.innerHTML = "";
+            const snapshot = await getDocs(collection(db, "membres"));
+            const membres = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            membres.sort((a, b) => MEMBRES_DATA.findIndex(m => m.id === a.id) - MEMBRES_DATA.findIndex(m => m.id === b.id));
+
+            for (const membre of membres) {
+                const tr = document.createElement("tr");
+                const tdNom = document.createElement("td");
+                tdNom.textContent = membre.nom || membre.id;
+                tdNom.style.fontWeight = "bold";
+                tr.appendChild(tdNom);
+
+                for (let i = 0; i < JOURS.length; i++) {
+                    const td = document.createElement("td");
+                    const jour = JOURS[i];
+                    const cal = CALENDRIER[i];
+
+                    if (cal.type === "off") {
+                        td.style.background = "rgba(0,0,0,0.12)";
+                        td.textContent = "\u2014";
+                        td.style.color = "rgba(255,255,255,0.3)";
+                    } else {
+                        const statut = membre.edt?.[jour]?.statut || "absent_reponse";
+                        const dot = document.createElement("div");
+                        dot.style.width = "20px";
+                        dot.style.height = "20px";
+                        dot.style.borderRadius = "50%";
+                        dot.style.margin = "0 auto";
+                        dot.style.background = getColorForStatut(statut);
+                        dot.style.border = "2px solid rgba(255,255,255,0.3)";
+                        td.appendChild(dot);
+                    }
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+        }
+
+        chargerTableauGeneral();
 
         const stateButton = document.getElementById("stateButton");
         const stateLogin = document.getElementById("stateLogin");
@@ -333,95 +397,92 @@
         });
 
         async function afficherEdtPersonnel(data) {
-    const surnom = MEMBRES_DATA.find(m => m.id === currentMembreId)?.surnom || data.nom;
-    edtMembreNom.textContent = currentIsAdmin ? "Mode Admin" : surnom;
-    edtPersonnelContainer.innerHTML = "";
+            const surnom = MEMBRES_DATA.find(m => m.id === currentMembreId)?.surnom || data.nom;
+            edtMembreNom.textContent = currentIsAdmin ? "Mode Admin" : surnom;
+            edtPersonnelContainer.innerHTML = "";
 
-    const wrapper = document.createElement("div");
-    wrapper.style.display = "flex";
-    wrapper.style.alignItems = "flex-start";
-    wrapper.style.gap = "20px";
-    wrapper.style.justifyContent = "center";
+            const wrapper = document.createElement("div");
+            wrapper.style.display = "flex";
+            wrapper.style.alignItems = "flex-start";
+            wrapper.style.gap = "20px";
+            wrapper.style.justifyContent = "center";
 
-    // Left: welcome message
-    const left = document.createElement("div");
-    left.style.minWidth = "120px";
-    left.style.textAlign = "left";
-    left.style.paddingTop = "30px";
-    const welcome = document.createElement("div");
-    welcome.style.fontSize = "1.2rem";
-    welcome.style.fontWeight = "bold";
-    welcome.textContent = currentIsAdmin ? "Bienvenue Admin" : "Bienvenue " + (surnom || data.nom);
-    left.appendChild(welcome);
+            const left = document.createElement("div");
+            left.style.minWidth = "120px";
+            left.style.textAlign = "left";
+            left.style.paddingTop = "30px";
+            const welcome = document.createElement("div");
+            welcome.style.fontSize = "1.2rem";
+            welcome.style.fontWeight = "bold";
+            welcome.textContent = currentIsAdmin ? "Bienvenue Admin" : "Bienvenue " + (surnom || data.nom);
+            left.appendChild(welcome);
 
-    // Center: table
-    const center = document.createElement("div");
-    const table = document.createElement("table");
-    table.className = "edt-perso-table";
+            const center = document.createElement("div");
+            const table = document.createElement("table");
+            table.className = "edt-perso-table";
 
-    const thead = document.createElement("thead");
-    const headerRow = document.createElement("tr");
-    headerRow.appendChild(createTh(""));
-    for (const jour of JOURS) {
-        headerRow.appendChild(createTh(jour.charAt(0).toUpperCase() + jour.slice(1, 3)));
-    }
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            headerRow.appendChild(createTh(""));
+            for (const jour of JOURS) {
+                headerRow.appendChild(createTh(jour.charAt(0).toUpperCase() + jour.slice(1, 3)));
+            }
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
 
-    const tbody = document.createElement("tbody");
-    if (currentIsAdmin) {
-        for (const m of MEMBRES_DATA) {
-            tbody.appendChild(await createMembreRow(m.id, m.surnom || m.nom));
+            const tbody = document.createElement("tbody");
+            if (currentIsAdmin) {
+                for (const m of MEMBRES_DATA) {
+                    tbody.appendChild(await createMembreRow(m.id, m.surnom || m.nom));
+                }
+            } else {
+                tbody.appendChild(await createMembreRow(currentMembreId, surnom || data.nom));
+            }
+            table.appendChild(tbody);
+            center.appendChild(table);
+
+            const right = document.createElement("div");
+            right.style.minWidth = "140px";
+            right.style.textAlign = "left";
+            right.style.paddingTop = "30px";
+            const legendTitle = document.createElement("div");
+            legendTitle.style.fontWeight = "bold";
+            legendTitle.style.marginBottom = "10px";
+            legendTitle.textContent = "L\u00e9gende";
+            right.appendChild(legendTitle);
+
+            const legendItems = [
+                { value: "absent_reponse", label: "Pas de r\u00e9ponse", color: "#666" },
+                { value: "present", label: "Pr\u00e9sent", color: "#4CAF50" },
+                { value: "absent", label: "Absent", color: "#f44336" },
+                { value: "contrainte_horaire", label: "Avec contrainte", color: "#FF9800" },
+                { value: "abstention", label: "S'abstenir", color: "#9C27B0" }
+            ];
+
+            for (const item of legendItems) {
+                const row = document.createElement("div");
+                row.style.display = "flex";
+                row.style.alignItems = "center";
+                row.style.marginBottom = "6px";
+                row.style.fontSize = "0.85rem";
+                const dot = document.createElement("span");
+                dot.style.width = "14px";
+                dot.style.height = "14px";
+                dot.style.borderRadius = "50%";
+                dot.style.display = "inline-block";
+                dot.style.marginRight = "8px";
+                dot.style.background = item.color;
+                dot.style.flexShrink = "0";
+                row.appendChild(dot);
+                row.appendChild(document.createTextNode(item.label));
+                right.appendChild(row);
+            }
+
+            wrapper.appendChild(left);
+            wrapper.appendChild(center);
+            wrapper.appendChild(right);
+            edtPersonnelContainer.appendChild(wrapper);
         }
-    } else {
-        tbody.appendChild(await createMembreRow(currentMembreId, surnom || data.nom));
-    }
-    table.appendChild(tbody);
-    center.appendChild(table);
-
-    // Right: legend
-    const right = document.createElement("div");
-    right.style.minWidth = "140px";
-    right.style.textAlign = "left";
-    right.style.paddingTop = "30px";
-    const legendTitle = document.createElement("div");
-    legendTitle.style.fontWeight = "bold";
-    legendTitle.style.marginBottom = "10px";
-    legendTitle.textContent = "L\u00e9gende";
-    right.appendChild(legendTitle);
-
-    const legendItems = [
-        { value: "absent_reponse", label: "Pas de r\u00e9ponse", color: "#666" },
-        { value: "present", label: "Pr\u00e9sent", color: "#4CAF50" },
-        { value: "absent", label: "Absent", color: "#f44336" },
-        { value: "contrainte_horaire", label: "Avec contrainte", color: "#FF9800" },
-        { value: "abstention", label: "S'abstenir", color: "#9C27B0" }
-    ];
-
-    for (const item of legendItems) {
-        const row = document.createElement("div");
-        row.style.display = "flex";
-        row.style.alignItems = "center";
-        row.style.marginBottom = "6px";
-        row.style.fontSize = "0.85rem";
-        const dot = document.createElement("span");
-        dot.style.width = "14px";
-        dot.style.height = "14px";
-        dot.style.borderRadius = "50%";
-        dot.style.display = "inline-block";
-        dot.style.marginRight = "8px";
-        dot.style.background = item.color;
-        dot.style.flexShrink = "0";
-        row.appendChild(dot);
-        row.appendChild(document.createTextNode(item.label));
-        right.appendChild(row);
-    }
-
-    wrapper.appendChild(left);
-    wrapper.appendChild(center);
-    wrapper.appendChild(right);
-    edtPersonnelContainer.appendChild(wrapper);
-}
 
         function createTh(text) {
             const th = document.createElement("th");
@@ -474,6 +535,7 @@
 
                 // Dropdown menu
                 const dropdown = document.createElement("div");
+                dropdown.className = "statut-dropdown";
                 dropdown.style.display = "none";
                 dropdown.style.position = "absolute";
                 dropdown.style.top = "30px";
@@ -568,9 +630,6 @@
             sauvegarderEdt(membreId);
         }
 
-            return tr;
-        }
-
         let saveTimeout = null;
 
         async function sauvegarderEdt(membreId) {
@@ -592,12 +651,16 @@
                     await setDoc(doc(db, "membres", membreId), { edt }, { merge: true });
                     saveIndicator.textContent = "Sauvegard\u00e9 \u2713";
                     setTimeout(() => { saveIndicator.textContent = ""; }, 2000);
+                    chargerTableauGeneral();
                 } catch (e) {
                     saveIndicator.textContent = "Erreur de sauvegarde";
                     console.error("Erreur sauvegarde", e);
                 }
-            }, 500);
+            }, 2000);
         }
+        document.addEventListener("click", () => {
+            document.querySelectorAll(".statut-dropdown").forEach(d => d.style.display = "none");
+        });
     </script>
 </body>
 </html>
