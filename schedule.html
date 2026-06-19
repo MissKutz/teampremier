@@ -981,18 +981,35 @@
                 dotContainer.appendChild(dropdown);
                 td.appendChild(dotContainer);
 
-                // Contrainte input (hidden by default)
-                const contrainteInput = document.createElement("input");
-                contrainteInput.type = "text";
-                contrainteInput.className = "contrainte-input";
-                contrainteInput.dataset.membreId = membreId;
-                contrainteInput.dataset.jour = jour;
-                contrainteInput.placeholder = "...";
-                contrainteInput.value = contrainteActuelle;
-                contrainteInput.style.display = (statutActuel === "contrainte_horaire" || statutActuel === "abstention") ? "block" : "none";
-                contrainteInput.style.marginTop = "4px";
-                contrainteInput.addEventListener("input", () => sauvegarderEdt(membreId));
-                td.appendChild(contrainteInput);
+                // Contrainte dropdown (hidden by default)
+                const contrainteSelect = document.createElement("select");
+                contrainteSelect.className = "contrainte-select";
+                contrainteSelect.dataset.membreId = membreId;
+                contrainteSelect.dataset.jour = jour;
+                contrainteSelect.style.display = (statutActuel === "contrainte_horaire" || statutActuel === "abstention") ? "block" : "none";
+                contrainteSelect.style.marginTop = "4px";
+                contrainteSelect.style.width = "100%";
+                // Option vide
+                const optionVide = document.createElement("option");
+                optionVide.value = "";
+                optionVide.textContent = "...";
+                contrainteSelect.appendChild(optionVide);
+                // Générer les créneaux horaires en fonction du type de match/entrainement
+                const cal = CALENDRIER[jour];
+                const startHour = parseInt(cal.horaire.split("h")[0]);
+                const endHour = parseInt(cal.horaire.split("-")[1]);
+                for (let h = startHour; h < endHour; h++) {
+                    for (let m = 0; m < 60; m += 5) {
+                        const timeStr = h + "h" + (m < 10 ? "0" + m : m);
+                        const option = document.createElement("option");
+                        option.value = timeStr;
+                        option.textContent = timeStr;
+                        contrainteSelect.appendChild(option);
+                    }
+                }
+                contrainteSelect.value = contrainteActuelle;
+                contrainteSelect.addEventListener("change", () => sauvegarderEdt(membreId));
+                td.appendChild(contrainteSelect);
 
                 tr.appendChild(td);
             }
