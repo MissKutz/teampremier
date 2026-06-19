@@ -14,7 +14,7 @@
             color: #fff;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         h1 {
@@ -32,7 +32,6 @@
             border-collapse: collapse;
             background: rgba(255,255,255,0.1);
             border-radius: 10px;
-            overflow: hidden;
         }
         th, td {
             border: 1px solid rgba(255,255,255,0.3);
@@ -71,7 +70,7 @@
         #authZone {
             text-align: center;
             margin: 20px auto;
-            max-width: 800px;
+            max-width: 1400px;
             padding: 20px;
             background: rgba(255,255,255,0.05);
             border-radius: 10px;
@@ -261,29 +260,28 @@
             const tbody = document.getElementById("generalTableBody");
             if (!head || !tbody) return;
 
-            const weekDates = getWeekDates();
-
-            // En-tête : 3 lignes
             head.innerHTML = "";
-            const lignes = [NOMS_JOURS, weekDates, CALENDRIER.map(c => c.horaire)];
-            for (let ligneIdx = 0; ligneIdx < 3; ligneIdx++) {
-                const tr = document.createElement("tr");
-                const thLabel = document.createElement("th");
-                thLabel.textContent = ligneIdx === 0 ? "Membres" : "";
-                tr.appendChild(thLabel);
-                for (let i = 0; i < 7; i++) {
-                    const th = document.createElement("th");
-                    if (CALENDRIER[i].type === "off") {
-                        th.style.background = "rgba(0,0,0,0.15)";
-                        th.style.color = "rgba(255,255,255,0.4)";
-                    }
-                    th.innerHTML = lignes[ligneIdx][i];
-                    th.style.fontSize = ligneIdx === 2 ? "0.8rem" : "";
-                    th.style.fontWeight = ligneIdx === 2 ? "normal" : "";
-                    tr.appendChild(th);
+            const weekDates = getWeekDates();
+            const tr = document.createElement("tr");
+            const thLabel = document.createElement("th");
+            thLabel.textContent = "Membres";
+            tr.appendChild(thLabel);
+
+            for (let i = 0; i < 7; i++) {
+                const th = document.createElement("th");
+                const cal = CALENDRIER[i];
+                if (cal.type === "off") {
+                    th.style.background = "rgba(0,0,0,0.15)";
+                    th.style.color = "rgba(255,255,255,0.4)";
                 }
-                head.appendChild(tr);
+                th.innerHTML = NOMS_JOURS[i] +
+                    "<br><span style='font-size:0.75rem;font-weight:normal;'>" + weekDates[i] +
+                    "</span><br><span style='font-size:0.75rem;font-weight:normal;'>" + cal.horaire +
+                    "</span><br><span style='font-size:0.7rem;font-weight:normal;opacity:0.8;'>" +
+                    (cal.type === "off" ? "" : (cal.type === "entrainement" ? "Entra\u00eenement" : "Match")) + "</span>";
+                tr.appendChild(th);
             }
+            head.appendChild(tr);
 
             // Corps
             tbody.innerHTML = "";
@@ -335,7 +333,6 @@
         const btnDeconnexion = document.getElementById("btnDeconnexion");
         const mdpInput = document.getElementById("mdpInput");
         const loginError = document.getElementById("loginError");
-        const edtMembreNom = document.getElementById("edtMembreNom");
         const edtPersonnelContainer = document.getElementById("edtPersonnelContainer");
         const saveIndicator = document.getElementById("saveIndicator");
 
@@ -493,7 +490,7 @@
                 { value: "present", label: "Présent", color: "#4CAF50" },
                 { value: "absent", label: "Absent", color: "#f44336" },
                 { value: "contrainte_horaire", label: "Présent avec contrainte horaires ", color: "#FF9800" },
-                { value: "abstention", label: "Je suis là mais je joue seulement si c'est vraiment nécessaire", color: "#9C27B0" }
+                { value: "abstention", label: "Je suis là mais je joue seulement si c'est vraiment nécessaire", color: "#6A1B9A" }
             ];
 
             for (const item of legendItems) {
@@ -544,6 +541,7 @@
             }
 
             for (const jour of JOURS) {
+                const td = document.createElement("td");
                 if (jour === "lundi" || jour === "mardi") {
                     td.style.background = "rgba(0,0,0,0.12)";
                     td.textContent = "\u2014";
@@ -551,7 +549,6 @@
                     tr.appendChild(td);
                     continue;
                 }
-                const td = document.createElement("td");
                 td.style.padding = "6px";
 
                 const dotContainer = document.createElement("div");
@@ -597,7 +594,7 @@
                     { value: "present", color: "#4CAF50" },
                     { value: "absent", color: "#f44336" },
                     { value: "contrainte_horaire", color: "#FF9800" },
-                    { value: "abstention", color: "#9C27B0" }
+                    { value: "abstention", color: "#6A1B9A" }
                 ];
 
                 for (const c of colors) {
@@ -623,7 +620,16 @@
                     e.stopPropagation();
                     const allDropdowns = document.querySelectorAll(".statut-dropdown");
                     allDropdowns.forEach(d => d.style.display = "none");
-                    dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+                    const rect = td.getBoundingClientRect();
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    if (spaceBelow < 200) {
+                        dropdown.style.top = "auto";
+                        dropdown.style.bottom = "30px";
+                    } else {
+                        dropdown.style.top = "30px";
+                        dropdown.style.bottom = "auto";
+                    }
+                    dropdown.style.display = "block";
                 });
 
                 dotContainer.appendChild(dot);
@@ -654,7 +660,7 @@
                 present: "#4CAF50",
                 absent: "#f44336",
                 contrainte_horaire: "#FF9800",
-                abstention: "#9C27B0"
+                abstention: "#6A1B9A"
             };
             return map[statut] || "#666";
         }
@@ -702,10 +708,8 @@
                 }
             }, 2000);
         }
-        document.addEventListener("click", (e) => {
-            if (!e.target.closest(".statut-dropdown") && !e.target.closest(".statut-dropdown") && !e.target.matches(".statut-dropdown *")) {
-                document.querySelectorAll(".statut-dropdown").forEach(d => d.style.display = "none");
-            }
+        document.addEventListener("click", () => {
+            document.querySelectorAll(".statut-dropdown").forEach(d => d.style.display = "none");
         });
     </script>
 </body>
