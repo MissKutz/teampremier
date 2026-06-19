@@ -129,6 +129,13 @@
             opacity: 0.8;
             margin-left: 10px;
         }
+        #generalTableHead th:nth-child(2),
+        #generalTableHead th:nth-child(3),
+        #generalTableBody td:nth-child(2),
+        #generalTableBody td:nth-child(3) {
+            width: 60px;
+            min-width: 60px;
+        }
     </style>
 </head>
 <body>
@@ -143,11 +150,10 @@
             <p id="loginError"></p>
         </div>
         <div id="stateEdt" style="display:none;">
-            <h2>EDT de <span id="edtMembreNom"></span></h2>
             <div id="edtPersonnelContainer"></div>
             <div style="margin-top:15px;">
                 <span class="save-indicator" id="saveIndicator"></span>
-                <button class="btn btn-secondary" id="btnDeconnexion">Se d&eacute;connecter</button>
+                <button class="btn btn-secondary" id="btnDeconnexion">Se déconnecter</button>
             </div>
         </div>
     </div>
@@ -336,6 +342,20 @@
         let currentMembreId = null;
         let currentIsAdmin = false;
 
+        // Restaurer la session
+        const savedId = sessionStorage.getItem("membreId");
+        const savedAdmin = sessionStorage.getItem("isAdmin");
+        if (savedId && savedAdmin !== null) {
+            currentMembreId = savedId;
+            currentIsAdmin = savedAdmin === "true";
+            // Recharger l'EDT perso
+            const snap = await getDoc(doc(db, "membres", savedId));
+            if (snap.exists()) {
+                afficherEdtPersonnel(snap.data());
+                showState("edt");
+            }
+        }
+
         function showState(state) {
             stateButton.style.display = "none";
             stateLogin.style.display = "none";
@@ -352,9 +372,14 @@
         });
 
         btnFermerLogin.addEventListener("click", () => showState("button"));
+        mdpInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") btnValider.click();
+        });
         btnDeconnexion.addEventListener("click", () => {
             currentMembreId = null;
             currentIsAdmin = false;
+            sessionStorage.removeItem("membreId");
+            sessionStorage.removeItem("isAdmin");
             showState("button");
         });
 
@@ -391,6 +416,8 @@
 
             currentMembreId = membreId;
             currentIsAdmin = isAdmin;
+            sessionStorage.setItem("membreId", currentMembreId);
+            sessionStorage.setItem("isAdmin", currentIsAdmin);
             loginError.textContent = "";
             afficherEdtPersonnel(membreData);
             showState("edt");
@@ -398,7 +425,6 @@
 
         async function afficherEdtPersonnel(data) {
             const surnom = MEMBRES_DATA.find(m => m.id === currentMembreId)?.surnom || data.nom;
-            edtMembreNom.textContent = currentIsAdmin ? "Mode Admin" : surnom;
             edtPersonnelContainer.innerHTML = "";
 
             const wrapper = document.createElement("div");
@@ -414,7 +440,7 @@
             const welcome = document.createElement("div");
             welcome.style.fontSize = "1.2rem";
             welcome.style.fontWeight = "bold";
-            welcome.textContent = currentIsAdmin ? "Bienvenue Admin" : "Bienvenue " + (surnom || data.nom);
+            welcome.innerHTML = currentIsAdmin ? "Bienvenue<br>Admin" : "Bienvenue<br>" + (surnom || data.nom);
             left.appendChild(welcome);
 
             const center = document.createElement("div");
@@ -424,8 +450,19 @@
             const thead = document.createElement("thead");
             const headerRow = document.createElement("tr");
             headerRow.appendChild(createTh(""));
-            for (const jour of JOURS) {
-                headerRow.appendChild(createTh(jour.charAt(0).toUpperCase() + jour.slice(1, 3)));
+            const weekDates = getWeekDates();
+            for (let i = 0; i < JOURS.length; i++) {
+                const th = document.createElement("th");
+                const cal = CALENDRIER[i];
+                if (cal.type === "off") {
+                    th.style.background = "rgba(0,0,0,0.15)";
+                    th.style.color = "rgba(255,255,255,0.4)";
+                }
+                th.innerHTML = (JOURS[i].charAt(0).toUpperCase() + JOURS[i].slice(1, 3)) +
+                    "<br><span style='font-size:0.75rem;font-weight:normal;'>" + weekDates[i] + " " + cal.horaire +
+                    "</span><br><span style='font-size:0.7rem;font-weight:normal;opacity:0.8;'>" +
+                    (cal.type === "entrainement" ? "Entrainement" : "Match") + "</span>";
+                headerRow.appendChild(th);
             }
             thead.appendChild(headerRow);
             table.appendChild(thead);
@@ -507,6 +544,13 @@
             }
 
             for (const jour of JOURS) {
+                if (jour === "lundi" || jour === "mardi") {
+                    td.style.background = "rgba(0,0,0,0.12)";
+                    td.textContent = "\u2014";
+                    td.style.color = "rgba(255,255,255,0.3)";
+                    tr.appendChild(td);
+                    continue;
+                }
                 const td = document.createElement("td");
                 td.style.padding = "6px";
 
@@ -658,8 +702,10 @@
                 }
             }, 2000);
         }
-        document.addEventListener("click", () => {
-            document.querySelectorAll(".statut-dropdown").forEach(d => d.style.display = "none");
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest(".statut-dropdown") && !e.target.closest(".statut-dropdown") && !e.target.matches(".statut-dropdown *")) {
+                document.querySelectorAll(".statut-dropdown").forEach(d => d.style.display = "none");
+            }
         });
     </script>
 </body>
