@@ -149,6 +149,7 @@
             <p id="loginError"></p>
         </div>
         <div id="stateEdt" style="display:none;">
+            <div id="navPerso"></div>
             <div id="edtPersonnelContainer"></div>
             <div style="margin-top:15px;">
                 <span class="save-indicator" id="saveIndicator"></span>
@@ -159,6 +160,7 @@
 
     <div class="container">
         <h1>Emploi du Temps</h1>
+        <div id="navGeneral"></div>
         <table>
             <thead id="generalTableHead">
                 <!-- Généré par JS -->
@@ -168,7 +170,7 @@
             </tbody>
         </table>
         <div id="calendrierInfos" style="margin-top:15px; text-align:center; font-size:0.95rem; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px;">
-            <span style="color:#4CAF50; font-weight:bold;">Match</span> : jeudi, samedi, dimanche &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span style="color:#ff0000; font-weight:bold;">Match</span> : jeudi, samedi, dimanche &nbsp;&nbsp;|&nbsp;&nbsp;
             <span style="color:#FF9800; font-weight:bold;">Entraînement</span> : mercredi, vendredi
         </div>
         <div style="text-align:center;">
@@ -214,20 +216,24 @@
             { id: "clement", nom: "Clément", surnom: "Clemrsse", mdp: "clemrsse123" }
         ];
 
+        let weekOffset = 0;
+
         async function seedFirestore() {
             try {
                 const snapshot = await getDocs(collection(db, "membres"));
                 if (snapshot.size > 0) return;
 
                 for (const m of MEMBRES_DATA) {
-                    const edt = {};
+                    let edt = {};
+                    const semaineKey = getWeekKey(0);
+                    edt[semaineKey] = {};
                     for (const jour of JOURS) {
-                        edt[jour] = { statut: "absent_reponse", contrainte: "" };
+                        edt[semaineKey][jour] = { statut: "absent_reponse", contrainte: "" };
                     }
                     await setDoc(doc(db, "membres", m.id), {
                         nom: m.nom,
                         mdp: m.mdp,
-                        ...(m.mdp_admin ? { mdp_admin: m.mdp_admin } : {}),
+                            ...(m.mdp_admin ? { mdp_admin: m.mdp_admin } : {}),
                         edt
                     });
                 }
@@ -238,12 +244,33 @@
         }
         seedFirestore();
 
-        function getWeekDates() {
+        async function migrerEdtSiNecessaire() {
+            const snapshot = await getDocs(collection(db, "membres"));
+            const semaineKey = getWeekKey(0);
+            for (const d of snapshot.docs) {
+                const data = d.data();
+                if (!data.edt) continue;
+                const hasNewFormat = Object.keys(data.edt).some(k => /^\d{4}-\d{2}-\d{2}$/.test(k));
+                // Si edt a des clés comme "lundi", "mardi"... (ancien format) et PAS de nouveau format
+                if (!hasNewFormat && data.edt.lundi && typeof data.edt.lundi === "object" && data.edt.lundi.statut) {
+                    const newEdt = { [semaineKey]: {} };
+                    for (const jour of JOURS) {
+                        newEdt[semaineKey][jour] = data.edt[jour] || { statut: "absent_reponse", contrainte: "" };
+                    }
+                    await setDoc(doc(db, "membres", d.id), { edt: newEdt }, { merge: true });
+                }
+            }
+        }
+        migrerEdtSiNecessaire();
+        initNavigation();
+        updateWeekLabel();
+
+        function getWeekDates(offset = 0) {
             const now = new Date();
             const day = now.getDay();
             const diff = day === 0 ? -6 : 1 - day;
             const monday = new Date(now);
-            monday.setDate(now.getDate() + diff);
+            monday.setDate(now.getDate() + diff + offset * 7);
             const dates = [];
             for (let i = 0; i < 7; i++) {
                 const d = new Date(monday);
@@ -255,13 +282,25 @@
             return dates;
         }
 
+        function getWeekKey(offset = 0) {
+            const now = new Date();
+            const day = now.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + diff + offset * 7);
+            const y = monday.getFullYear();
+            const m = String(monday.getMonth() + 1).padStart(2, "0");
+            const d = String(monday.getDate()).padStart(2, "0");
+            return y + "-" + m + "-" + d; 
+        }
+
         async function chargerTableauGeneral() {
             const head = document.getElementById("generalTableHead");
             const tbody = document.getElementById("generalTableBody");
             if (!head || !tbody) return;
 
             head.innerHTML = "";
-            const weekDates = getWeekDates();
+            const weekDates = getWeekDates(weekOffset);
             const tr = document.createElement("tr");
             const thLabel = document.createElement("th");
             thLabel.textContent = "Membres";
@@ -306,7 +345,9 @@
                         td.textContent = "\u2014";
                         td.style.color = "rgba(255,255,255,0.3)";
                     } else {
-                        const statut = membre.edt?.[jour]?.statut || "absent_reponse";
+                        const weekKey = getWeekKey(weekOffset);
+                        const semaineEdt = membre.edt?.[weekKey] || {};
+                        const statut = semaineEdt[jour]?.statut || "absent_reponse";
                         const dot = document.createElement("div");
                         dot.style.width = "20px";
                         dot.style.height = "20px";
@@ -320,6 +361,48 @@
                 }
                 tbody.appendChild(tr);
             }
+        }
+
+        function initNavigation() {
+            const navHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;">' +
+                '<button class="btn btn-secondary nav-rewind3">&laquo;&laquo;</button>' +
+                '<button class="btn btn-secondary nav-prev">&laquo;</button>' +
+                '<span class="week-label" style="font-size:1.1rem;font-weight:bold;min-width:220px;text-align:center;">Semaine du ...</span>' +
+                '<button class="btn btn-secondary nav-next">&raquo;</button>' +
+                '<button class="btn btn-secondary nav-forward3">&raquo;&raquo;</button>' +
+                '</div>';
+            document.getElementById("navPerso").innerHTML = navHTML;
+            document.getElementById("navGeneral").innerHTML = navHTML;
+            document.querySelectorAll("#navPerso .nav-rewind3, #navGeneral .nav-rewind3").forEach(b => b.addEventListener("click", () => changeWeek(-3)));
+            document.querySelectorAll("#navPerso .nav-prev, #navGeneral .nav-prev").forEach(b => b.addEventListener("click", () => changeWeek(-1)));
+            document.querySelectorAll("#navPerso .nav-next, #navGeneral .nav-next").forEach(b => b.addEventListener("click", () => changeWeek(1)));
+            document.querySelectorAll("#navPerso .nav-forward3, #navGeneral .nav-forward3").forEach(b => b.addEventListener("click", () => changeWeek(3)));
+        }
+
+        function changeWeek(delta) {
+            weekOffset = Math.max(-3, Math.min(3, weekOffset + delta));
+            updateWeekLabel();
+            chargerTableauGeneral();
+            if (currentMembreId) refreshEdtPerso();
+        }
+
+        function updateWeekLabel() {
+            const now = new Date();
+            const day = now.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + diff + weekOffset * 7);
+            const dd = String(monday.getDate()).padStart(2, "0");
+            const mm = String(monday.getMonth() + 1).padStart(2, "0");
+            const yyyy = monday.getFullYear();
+            const label = "Semaine du " + dd + "/" + mm + "/" + yyyy;
+            document.querySelectorAll(".week-label").forEach(el => el.textContent = label);
+        }
+
+        async function refreshEdtPerso() {
+            if (!currentMembreId) return;
+            const snap = await getDoc(doc(db, "membres", currentMembreId));
+            if (snap.exists()) afficherEdtPersonnel(snap.data());
         }
 
         chargerTableauGeneral();
@@ -447,7 +530,7 @@
             const thead = document.createElement("thead");
             const headerRow = document.createElement("tr");
             headerRow.appendChild(createTh(""));
-            const weekDates = getWeekDates();
+            const weekDates = getWeekDates(weekOffset);
             for (let i = 0; i < JOURS.length; i++) {
                 const th = document.createElement("th");
                 const cal = CALENDRIER[i];
@@ -456,7 +539,8 @@
                     th.style.color = "rgba(255,255,255,0.4)";
                 }
                 th.innerHTML = (JOURS[i].charAt(0).toUpperCase() + JOURS[i].slice(1, 3)) +
-                    "<br><span style='font-size:0.75rem;font-weight:normal;'>" + weekDates[i] + " " + cal.horaire +
+                    "<br><span style='font-size:0.75rem;font-weight:normal;'>" + weekDates[i] +
+                    "</span><br><span style='font-size:0.75rem;font-weight:normal;'>" + cal.horaire +
                     "</span><br><span style='font-size:0.7rem;font-weight:normal;opacity:0.8;'>" +
                     (cal.type === "entrainement" ? "Entrainement" : "Match") + "</span>";
                 headerRow.appendChild(th);
@@ -532,10 +616,14 @@
             tdNom.style.fontSize = "0.9rem";
             tr.appendChild(tdNom);
 
-            let edtData = null;
+            let edtData = {};
             try {
                 const snap = await getDoc(doc(db, "membres", membreId));
-                if (snap.exists()) edtData = snap.data().edt || {};
+                if (snap.exists()) {
+                    const data = snap.data();
+                    const semaineKey = getWeekKey(weekOffset);
+                    edtData = data.edt?.[semaineKey] || {};
+                }
             } catch (e) {
                 console.error("Erreur chargement", membreId, e);
             }
@@ -686,19 +774,24 @@
             if (saveTimeout) clearTimeout(saveTimeout);
             saveIndicator.textContent = "Sauvegarde...";
             saveTimeout = setTimeout(async () => {
-                const edt = {};
+                const weekKey = getWeekKey(weekOffset);
+                const edtSemaine = {};
                 for (const jour of JOURS) {
                     const dot = document.querySelector(`div[data-membre-id="${membreId}"][data-jour="${jour}"]`);
                     if (!dot) continue;
                     const td = dot.closest("td");
                     const contrainteInput = td.querySelector(".contrainte-input");
-                    edt[jour] = {
+                    edtSemaine[jour] = {
                         statut: dot.dataset.value || "absent_reponse",
                         contrainte: contrainteInput.style.display !== "none" ? contrainteInput.value : ""
                     };
                 }
                 try {
-                    await setDoc(doc(db, "membres", membreId), { edt }, { merge: true });
+                    const ref = doc(db, "membres", membreId);
+                    const snap = await getDoc(ref);
+                    let edt = snap.exists() ? (snap.data().edt || {}) : {};
+                    edt[weekKey] = edtSemaine;
+                    await setDoc(ref, { edt }, { merge: true });
                     saveIndicator.textContent = "Sauvegard\u00e9 \u2713";
                     setTimeout(() => { saveIndicator.textContent = ""; }, 2000);
                     chargerTableauGeneral();
