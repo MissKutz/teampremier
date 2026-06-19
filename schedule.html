@@ -282,6 +282,19 @@
             return dates;
         }
 
+        function isPastDay(weekOffset, dayIndex) {
+            const now = new Date();
+            const currentDay = now.getDay();
+            const diff = currentDay === 0 ? -6 : 1 - currentDay;
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + diff + weekOffset * 7);
+            const target = new Date(monday);
+            target.setDate(monday.getDate() + dayIndex);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return target < today;
+        }
+
         function getWeekKey(offset = 0) {
             const now = new Date();
             const day = now.getDay();
@@ -309,7 +322,7 @@
             for (let i = 0; i < 7; i++) {
                 const th = document.createElement("th");
                 const cal = CALENDRIER[i];
-                if (cal.type === "off") {
+                if (cal.type === "off" || isPastDay(weekOffset, i)) {
                     th.style.background = "rgba(0,0,0,0.15)";
                     th.style.color = "rgba(255,255,255,0.4)";
                 }
@@ -340,7 +353,7 @@
                     const jour = JOURS[i];
                     const cal = CALENDRIER[i];
 
-                    if (cal.type === "off") {
+                    if (cal.type === "off" || isPastDay(weekOffset, i)) {
                         td.style.background = "rgba(0,0,0,0.12)";
                         td.textContent = "\u2014";
                         td.style.color = "rgba(255,255,255,0.3)";
@@ -365,18 +378,26 @@
 
         function initNavigation() {
             const navHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;">' +
-                '<button class="btn btn-secondary nav-rewind3">&laquo;&laquo;</button>' +
-                '<button class="btn btn-secondary nav-prev">&laquo;</button>' +
+                '<button class="btn btn-secondary nav-prev">&#9664;</button>' +
                 '<span class="week-label" style="font-size:1.1rem;font-weight:bold;min-width:220px;text-align:center;">Semaine du ...</span>' +
-                '<button class="btn btn-secondary nav-next">&raquo;</button>' +
-                '<button class="btn btn-secondary nav-forward3">&raquo;&raquo;</button>' +
+                '<button class="btn btn-secondary nav-next">&#9654;</button>' +
+                '<button class="btn btn-secondary nav-today">Semaine actuelle</button>' +
                 '</div>';
             document.getElementById("navPerso").innerHTML = navHTML;
             document.getElementById("navGeneral").innerHTML = navHTML;
-            document.querySelectorAll("#navPerso .nav-rewind3, #navGeneral .nav-rewind3").forEach(b => b.addEventListener("click", () => changeWeek(-3)));
-            document.querySelectorAll("#navPerso .nav-prev, #navGeneral .nav-prev").forEach(b => b.addEventListener("click", () => changeWeek(-1)));
-            document.querySelectorAll("#navPerso .nav-next, #navGeneral .nav-next").forEach(b => b.addEventListener("click", () => changeWeek(1)));
-            document.querySelectorAll("#navPerso .nav-forward3, #navGeneral .nav-forward3").forEach(b => b.addEventListener("click", () => changeWeek(3)));
+            document.querySelectorAll("#navPerso .nav-prev, #navGeneral .nav-prev")
+                .forEach(b => b.addEventListener("click", () => changeWeek(-1)));
+            document.querySelectorAll("#navPerso .nav-next, #navGeneral .nav-next")
+                .forEach(b => b.addEventListener("click", () => changeWeek(1)));
+            document.querySelectorAll("#navPerso .nav-today, #navGeneral .nav-today")
+                .forEach(b => b.addEventListener("click", goToToday));
+        }
+
+        function goToToday() {
+            weekOffset = 0;
+            updateWeekLabel();
+            chargerTableauGeneral();
+            if (currentMembreId) refreshEdtPerso();
         }
 
         function changeWeek(delta) {
@@ -534,7 +555,7 @@
             for (let i = 0; i < JOURS.length; i++) {
                 const th = document.createElement("th");
                 const cal = CALENDRIER[i];
-                if (cal.type === "off") {
+                if (cal.type === "off" || isPastDay(weekOffset, i)) {
                     th.style.background = "rgba(0,0,0,0.15)";
                     th.style.color = "rgba(255,255,255,0.4)";
                 }
@@ -628,9 +649,10 @@
                 console.error("Erreur chargement", membreId, e);
             }
 
-            for (const jour of JOURS) {
+            for (let i = 0; i < JOURS.length; i++) {
                 const td = document.createElement("td");
-                if (jour === "lundi" || jour === "mardi") {
+                const jour = JOURS[i];
+                if (jour === "lundi" || jour === "mardi" || isPastDay(weekOffset, i)) {
                     td.style.background = "rgba(0,0,0,0.12)";
                     td.textContent = "\u2014";
                     td.style.color = "rgba(255,255,255,0.3)";
