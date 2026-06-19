@@ -362,6 +362,7 @@
                         const weekKey = getWeekKey(weekOffset);
                         const semaineEdt = membre.edt?.[weekKey] || {};
                         const statut = semaineEdt[jour]?.statut || "absent_reponse";
+                        const contrainte = semaineEdt[jour]?.contrainte || "";
                         const dot = document.createElement("div");
                         dot.style.width = "20px";
                         dot.style.height = "20px";
@@ -371,10 +372,19 @@
                         dot.style.border = "2px solid rgba(255,255,255,0.1)";
                         dot.style.opacity = "0.35";
                         td.appendChild(dot);
+                        if ((statut === "contrainte_horaire" || statut === "abstention") && contrainte) {
+                            const label = document.createElement("div");
+                            label.style.fontSize = "0.6rem";
+                            label.style.color = "rgba(255,255,255,0.5)";
+                            label.style.marginTop = "2px";
+                            label.textContent = contrainte;
+                            td.appendChild(label);
+                        }
                     } else {
                         const weekKey = getWeekKey(weekOffset);
                         const semaineEdt = membre.edt?.[weekKey] || {};
                         const statut = semaineEdt[jour]?.statut || "absent_reponse";
+                        const contrainte = semaineEdt[jour]?.contrainte || "";
                         const dot = document.createElement("div");
                         dot.style.width = "20px";
                         dot.style.height = "20px";
@@ -383,6 +393,14 @@
                         dot.style.background = getColorForStatut(statut);
                         dot.style.border = "2px solid rgba(255,255,255,0.3)";
                         td.appendChild(dot);
+                        if ((statut === "contrainte_horaire" || statut === "abstention") && contrainte) {
+                            const label = document.createElement("div");
+                            label.style.fontSize = "0.6rem";
+                            label.style.color = "rgba(255,255,255,0.6)";
+                            label.style.marginTop = "2px";
+                            label.textContent = contrainte;
+                            td.appendChild(label);
+                        }
                     }
                     tr.appendChild(td);
                 }
@@ -415,7 +433,7 @@
         }
 
         function changeWeek(delta) {
-            weekOffset = Math.max(-3, Math.min(3, weekOffset + delta));
+            weekOffset = Math.max(-3, Math.min(7, weekOffset + delta));
             updateWeekLabel();
             chargerTableauGeneral();
             if (currentMembreId) refreshEdtPerso();
