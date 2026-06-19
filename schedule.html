@@ -331,6 +331,9 @@
                 const semaineEdt = membre.edt?.[weekKey] || {};
                 const statut = semaineEdt[jour]?.statut || "absent_reponse";
                 const contrainte = semaineEdt[jour]?.contrainte || "";
+                if (statut === "present" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
+                    continue;
+                }
                 if (statut === "present") greens.push({ surnom: getSurnom(membre.id), contrainte });
                 else if (statut === "contrainte_horaire") oranges.push({ surnom: getSurnom(membre.id), contrainte });
                 else if (statut === "abstention") violets.push({ surnom: getSurnom(membre.id), contrainte });
@@ -533,17 +536,19 @@
                         td.style.padding = "6px";
                         let constraintInfo = "";
                         if (info.allGreens && info.allGreens.length > 0 && info.selectedSurnoms && info.selectedSurnoms.length > 0) {
-                            const greens = membres.filter(m => info.allGreens.includes(getSurnom(m.id)));
-                            const oranges = greens.filter(g => {
-                                const semaineEdt = g.edt?.[weekKey] || {};
+                            const oranges = membres.filter(m => {
+                                const semaineEdt = m.edt?.[weekKey] || {};
                                 const jour = JOURS[i];
                                 const statut = semaineEdt[jour]?.statut;
                                 const contrainte = semaineEdt[jour]?.contrainte;
-                                return statut === "contrainte_horaire" && contrainte && validerContrainteHoraire(jour, contrainte);
+                                return statut === "contrainte_horaire" && contrainte;
                             });
                             if (oranges.length > 0) {
                                 const maxTime = oranges.reduce((max, o) => {
-                                    const m = o.contrainte.match(/(\d{1,2})h(\d{2})?/);
+                                    const semaineEdt = o.edt?.[weekKey] || {};
+                                    const jour = JOURS[i];
+                                    const contrainte = semaineEdt[jour]?.contrainte;
+                                    const m = contrainte.match(/(\d{1,2})h(\d{2})?/);
                                     if (!m) return max;
                                     const total = parseInt(m[1]) * 60 + (m[2] ? parseInt(m[2]) : 0);
                                     return Math.max(max, total);
@@ -1019,7 +1024,12 @@
                     setTimeout(() => { saveIndicator.textContent = ""; }, 3000);
                     return;
                 }
-                edtSemaine[jour] = { statut, contrainte };
+                // Si statut "present" mais contrainte invalide, changer en "contrainte_horaire"
+                if (statut === "present" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
+                    edtSemaine[jour] = { statut: "contrainte_horaire", contrainte };
+                } else {
+                    edtSemaine[jour] = { statut, contrainte };
+                }
             }
             try {
                 const ref = doc(db, "membres", membreId);
