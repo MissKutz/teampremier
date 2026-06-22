@@ -108,7 +108,7 @@
             background: rgba(255,255,255,0.2);
             font-weight: bold;
         }
-        .contrainte-select {
+        .contrainte-input {
             display: block;
             margin-top: 4px;
             padding: 4px 8px;
@@ -119,6 +119,9 @@
             font-size: 0.75rem;
             width: 100%;
             box-sizing: border-box;
+        }
+        .contrainte-input::placeholder {
+            color: rgba(255,255,255,0.4);
         }
         .save-indicator {
             font-size: 0.85rem;
@@ -132,6 +135,68 @@
             width: 60px;
             min-width: 60px;
         }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            background: transparent;
+            border-radius: 0;
+            border: none;
+        }
+
+        .header-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 0;
+            background: transparent;
+            padding: 0;
+            transition: transform 0.3s;
+        }
+
+        .header-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .header-logo-left {
+            order: 1;
+        }
+
+        .header-logo-right {
+            order: 3;
+        }
+
+        h1 {
+            order: 2;
+            text-align: center;
+            margin: 0;
+            font-size: 2rem;
+            color: #fff;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .header-logo-left,
+            .header-logo-right {
+                order: 2;
+            }
+            
+            h1 {
+                order: 1;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -155,8 +220,12 @@
         </div>
     </div>
 
-    <div class="container">
+    <!-- Remplacer la ligne 161-162 -->
+    <div class="header-container">
+        <img src="img/image.teampremier.webp" alt="Team Premier Logo" class="header-logo header-logo-left">
         <h1>Emploi du Temps</h1>
+        <img src="img/image.teampremier.webp" alt="Team Premier Logo" class="header-logo header-logo-right">
+    </div>
         <div id="navGeneral"></div>
         <table>
             <thead id="generalTableHead">
@@ -209,7 +278,7 @@
             { id: "jules", nom: "Jules", surnom: "FDM", mdp: "julesf0128" },
             { id: "sebastien", nom: "Sébastien", surnom: "Pollux", mdp: "Honda06+" },
             { id: "orphee", nom: "Orphée", surnom: "Orphée", mdp: "jemeraivoiralexiaenrobedechambre69" },
-            { id: "octave", nom: "Octave", surnom: "SacadUwU", mdp: "motdepasse.1" },
+            { id: "octave", nom: "Octave", surnom: "sacadUwU", mdp: "motdepasse.1" },
             { id: "clement", nom: "Clément", surnom: "Clemrsse", mdp: "clemrsse123" }
         ];
 
@@ -992,19 +1061,16 @@
                 optionVide.textContent = "...";
                 contrainteSelect.appendChild(optionVide);
                 // Générer les créneaux horaires en fonction du type de match/entrainement
-                const jourIndex = JOURS.indexOf(jour);
-                const cal = CALENDRIER[jourIndex];
-                if (cal.type !== "off") {
-                    const startHour = parseInt(cal.horaire.split("h")[0]);
-                    const endHour = parseInt(cal.horaire.split("-")[1]);
-                    for (let h = startHour; h < endHour; h++) {
-                        for (let m = 0; m < 60; m += 5) {
-                            const timeStr = h + "h" + (m < 10 ? "0" + m : m);
-                            const option = document.createElement("option");
-                            option.value = timeStr;
-                            option.textContent = timeStr;
-                            contrainteSelect.appendChild(option);
-                        }
+                const cal = CALENDRIER[jour];
+                const startHour = parseInt(cal.horaire.split("h")[0]);
+                const endHour = parseInt(cal.horaire.split("-")[1]);
+                for (let h = startHour; h < endHour; h++) {
+                    for (let m = 0; m < 60; m += 5) {
+                        const timeStr = h + "h" + (m < 10 ? "0" + m : m);
+                        const option = document.createElement("option");
+                        option.value = timeStr;
+                        option.textContent = timeStr;
+                        contrainteSelect.appendChild(option);
                     }
                 }
                 contrainteSelect.value = contrainteActuelle;
@@ -1032,11 +1098,12 @@
             dot.style.background = getColorForStatut(value);
             dropdown.style.display = "none";
             const td = dot.closest("td");
-            const contrainteSelect = td.querySelector(".contrainte-select");
+            const contrainteInput = td.querySelector(".contrainte-input");
             if (value === "contrainte_horaire" || value === "abstention") {
-                contrainteSelect.style.display = "block";
+                contrainteInput.style.display = "block";
+                contrainteInput.placeholder = value === "contrainte_horaire" ? "Arrive \u00e0..." : "Contrainte...";
             } else {
-                contrainteSelect.style.display = "none";
+                contrainteInput.style.display = "none";
             }
             sauvegarderEdt(membreId);
         }
@@ -1048,9 +1115,9 @@
                 const dot = document.querySelector(`div[data-membre-id="${membreId}"][data-jour="${jour}"]`);
                 if (!dot) continue;
                 const td = dot.closest("td");
-                const contrainteSelect = td.querySelector(".contrainte-select");
+                const contrainteInput = td.querySelector(".contrainte-input");
                 const statut = dot.dataset.value || "absent_reponse";
-                const contrainte = contrainteSelect.style.display !== "none" ? contrainteSelect.value : "";
+                const contrainte = contrainteInput.style.display !== "none" ? contrainteInput.value : "";
                 if (statut === "contrainte_horaire" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
                     saveIndicator.textContent = "\u274c Heure hors cr\u00e9neau pour " + jour + " !";
                     setTimeout(() => { saveIndicator.textContent = ""; }, 3000);
