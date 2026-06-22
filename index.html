@@ -837,6 +837,24 @@
     'yoru': 'img/agents/yoru.jpg'
   };
 
+  const NAME_TO_ID = {
+    "Morgane": "morgane",
+    "Enzo": "enzo",
+    "Jules": "jules",
+    "Sebastien": "sebastien",
+    "Orphée": "orphee",
+    "Octave": "octave",
+    "Clément": "clement"
+  };
+
+  function canEditSquare(name) {
+    const membreId = sessionStorage.getItem("membreId");
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    if (!membreId) return true; // pas connecté → localStorage
+    const targetId = NAME_TO_ID[name];
+    return membreId === targetId || isAdmin;
+  }
+
   function getMemberName(square) {
     return square.querySelector('.square-title').textContent.trim();
   }
@@ -859,7 +877,11 @@
   function saveConfig(square) {
     const name = getMemberName(square);
     const config = getConfig(square);
-    localStorage.setItem('agentConfig-' + name, JSON.stringify(config));
+    if (window.__saveAgentConfig) {
+      window.__saveAgentConfig(name, config);
+    } else {
+      localStorage.setItem('agentConfig-' + name, JSON.stringify(config));
+    }
   }
 
    function renderAgentDisplay(square, config) {
@@ -941,6 +963,11 @@
 
   function updateFromInput(input) {
     const square = input.closest('.square');
+    const name = getMemberName(square);
+    if (!canEditSquare(name)) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
     const val = input.value.trim().toLowerCase();
     if (!val) return;
     if (agentImages[val]) {
@@ -958,6 +985,11 @@
 
   function handleToggleClick(toggle) {
     const square = toggle.closest('.square');
+    const name = getMemberName(square);
+    if (!canEditSquare(name)) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
     const choices = toggle.parentElement.querySelector('.agent-choices');
     const inputs = square.querySelector('.agent-inputs');
 
@@ -977,6 +1009,11 @@
 
   function handleOptClick(opt) {
     const square = opt.closest('.square');
+    const name = getMemberName(square);
+    if (!canEditSquare(name)) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
     const val = parseInt(opt.dataset.value);
 
     opt.parentElement.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
@@ -991,17 +1028,24 @@
   function restoreSaved() {
     document.querySelectorAll('.square').forEach(square => {
       const name = getMemberName(square);
-      const saved = localStorage.getItem('agentConfig-' + name);
-      if (saved) {
-        try {
-          const config = JSON.parse(saved);
-          const opt = square.querySelector(`.agent-opt[data-value="${config.count}"]`);
-          if (opt) {
-            square.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-          }
-          renderAgentDisplay(square, config);
-        } catch (e) {}
+      let config = null;
+      // Essayer Firestore d'abord
+      if (window.__agentConfigs && window.__agentConfigs[name]) {
+        config = window.__agentConfigs[name];
+      } else {
+        // Fallback localStorage
+        const saved = localStorage.getItem('agentConfig-' + name);
+        if (saved) {
+          try { config = JSON.parse(saved); } catch (e) {}
+        }
+      }
+      if (config) {
+        const opt = square.querySelector(`.agent-opt[data-value="${config.count}"]`);
+        if (opt) {
+          square.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+        }
+        renderAgentDisplay(square, config);
       }
     });
   }
@@ -1054,6 +1098,7 @@
     }
   });
 
+  window.__restoreSaved = restoreSaved;
   restoreSaved();
 </script>
     <script type="module">
@@ -1240,6 +1285,55 @@
   document.getElementById("mdpInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") document.getElementById("btnValider").click();
   });
+
+  // --- Agent config Firestore ---
+  const NAME_TO_ID = {
+    "Morgane": "morgane",
+    "Enzo": "enzo",
+    "Jules": "jules",
+    "Sebastien": "sebastien",
+    "Orphée": "orphee",
+    "Octave": "octave",
+    "Clément": "clement"
+  };
+
+  window.__agentConfigs = {};
+
+  async function loadAgentConfigs() {
+    try {
+      const snapshot = await getDocs(collection(db, "membres"));
+      snapshot.forEach(doc => {
+        if (doc.data().agents) {
+          const entry = Object.entries(NAME_TO_ID).find(([, id]) => id === doc.id);
+          if (entry) {
+            window.__agentConfigs[entry[0]] = doc.data().agents;
+          }
+        }
+      });
+    } catch (e) {
+      console.error("Erreur chargement agents", e);
+    }
+    if (window.__restoreSaved) window.__restoreSaved();
+  }
+
+  window.__saveAgentConfig = async function(name, config) {
+    const id = NAME_TO_ID[name];
+    if (!id) return;
+    const savedId = sessionStorage.getItem("membreId");
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    if (savedId && savedId !== id && !isAdmin) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
+    try {
+      await setDoc(doc(db, "membres", id), { agents: config }, { merge: true });
+      window.__agentConfigs[name] = config;
+    } catch (e) {
+      console.error("Erreur sauvegarde agent", e);
+    }
+  };
+
+  loadAgentConfigs();
 
   restoreSession();
 </script>
