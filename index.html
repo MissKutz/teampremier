@@ -1463,12 +1463,10 @@
 
   document.querySelectorAll('.role-select').forEach(select => {
     const member = select.closest('.square').querySelector('.square-title').textContent.trim();
-    const saved = localStorage.getItem('role-' + member);
-    if (saved) select.value = saved;
 
     select.addEventListener('change', function() {
       const member = this.closest('.square').querySelector('.square-title').textContent.trim();
-      localStorage.setItem('role-' + member, this.value);
+      if (window.__saveRole) window.__saveRole(member, this.value);
     });
 
     const memberColors = {
@@ -1785,9 +1783,56 @@
     }
     };
 
+  // --- Role config Firestore ---
+  window.__roleConfigs = {};
+
+  async function loadRoles() {
+    try {
+      const snapshot = await getDocs(collection(db, "membres"));
+      snapshot.forEach(doc => {
+        if (doc.data().role) {
+          const entry = Object.entries(NAME_TO_ID).find(([, id]) => id === doc.id);
+          if (entry) {
+            window.__roleConfigs[entry[0]] = doc.data().role;
+          }
+        }
+      });
+    } catch (e) {
+      console.error("Erreur chargement roles", e);
+    }
+    applyRolesToSelects();
+  }
+
+  function applyRolesToSelects() {
+    document.querySelectorAll('.role-select').forEach(select => {
+      const member = select.closest('.square').querySelector('.square-title').textContent.trim();
+      if (window.__roleConfigs[member]) {
+        select.value = window.__roleConfigs[member];
+      }
+    });
+  }
+
+  window.__saveRole = async function(name, role) {
+    const id = NAME_TO_ID[name];
+    if (!id) return;
+    const savedId = sessionStorage.getItem("membreId");
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    if (savedId && savedId !== id && !isAdmin) {
+      alert("Vous ne pouvez modifier que votre propre rôle.");
+      return;
+    }
+    try {
+      await setDoc(doc(db, "membres", id), { role: role }, { merge: true });
+      window.__roleConfigs[name] = role;
+    } catch (e) {
+      console.error("Erreur sauvegarde rôle", e);
+    }
+  };
+
   showState("button");
 
   loadAgentConfigs();
+  loadRoles();
 
   loadTeamPoints();
   restoreSession();
