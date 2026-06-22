@@ -179,6 +179,11 @@
             color: #fff;
         }
 
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .header-container {
@@ -191,9 +196,127 @@
             .header-logo-right {
                 order: 2;
             }
+
+            .header-logo {
+                width: 80px;
+                height: 80px;
+            }
             
             h1 {
                 order: 1;
+                font-size: 1.5rem;
+                margin: 0.5rem 0;
+            }
+
+            body {
+                padding: 10px;
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+
+            .container {
+                padding: 0 5px;
+            }
+
+            #authZone {
+                padding: 10px;
+                margin: 10px auto;
+            }
+
+            #mdpInput {
+                width: 100%;
+                max-width: 200px;
+                margin: 0 auto 10px auto;
+                display: block;
+                box-sizing: border-box;
+            }
+
+            .btn, .back-btn {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+                margin: 4px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+                font-size: 0.75rem;
+                white-space: nowrap;
+            }
+
+            #generalTableHead th {
+                font-size: 0.7rem;
+            }
+
+            .edt-perso-table th,
+            .edt-perso-table td {
+                padding: 4px 2px;
+                font-size: 0.65rem;
+            }
+
+            .contrainte-input {
+                font-size: 0.6rem;
+                padding: 2px 4px;
+                width: 100%;
+                min-width: 60px;
+                box-sizing: border-box;
+            }
+
+            #calendrierInfos {
+                font-size: 0.75rem !important;
+                padding: 8px !important;
+            }
+
+            .save-indicator {
+                font-size: 0.75rem;
+                display: block;
+                margin: 5px 0;
+            }
+
+            #navGeneral div[style*="flex"],
+            #navPerso div[style*="flex"] {
+                gap: 8px !important;
+                flex-wrap: wrap !important;
+            }
+
+            .week-label {
+                font-size: 0.9rem !important;
+                min-width: 150px !important;
+            }
+
+            .roulette-display {
+                font-size: 0.65rem !important;
+            }
+
+            #edtPersonnelContainer > div {
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+
+            #edtPersonnelContainer > div > div {
+                min-width: unset !important;
+                width: 100% !important;
+                text-align: center !important;
+                padding-top: 10px !important;
+            }
+
+            .edt-perso-table {
+                font-size: 0.7rem;
+            }
+
+            .edt-perso-table th,
+            .edt-perso-table td {
+                padding: 4px 2px;
+            }
+
+            .edt-perso-table td div[style*="width: 24px"],
+            .edt-perso-table td div[style*="width: 20px"] {
+                width: 18px !important;
+                height: 18px !important;
+            }
+
+            #calendrierInfos span {
+                display: inline-block;
+                margin: 2px 0;
             }
         }
 
@@ -227,6 +350,7 @@
         <img src="img/image.teampremier.webp" alt="Team Premier Logo" class="header-logo header-logo-right">
     </div>
         <div id="navGeneral"></div>
+        <div class="table-scroll">
         <table>
             <thead id="generalTableHead">
                 <!-- Généré par JS -->
@@ -235,6 +359,7 @@
                 <!-- Généré par JS -->
             </tbody>
         </table>
+        </div>
         <div id="calendrierInfos" style="margin-top:15px; text-align:center; font-size:0.95rem; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px;">
             <span style="color:#ff0000; font-weight:bold;">Match</span> : jeudi, samedi, dimanche &nbsp;&nbsp;|&nbsp;&nbsp;
             <span style="color:#FF9800; font-weight:bold;">Entraînement</span> : mercredi, vendredi
@@ -880,7 +1005,10 @@
                 tbody.appendChild(await createMembreRow(currentMembreId, surnom || data.nom));
             }
             table.appendChild(tbody);
-            center.appendChild(table);
+            const scrollDiv = document.createElement("div");
+            scrollDiv.className = "table-scroll";
+            scrollDiv.appendChild(table);
+            center.appendChild(scrollDiv);
 
             const right = document.createElement("div");
             right.style.minWidth = "140px";
