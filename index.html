@@ -45,7 +45,7 @@
         opacity: 0.7;
     }
 
-    .footer {
+        .footer {
         margin-top: auto;
         display: flex;
         justify-content: space-between;
@@ -54,6 +54,48 @@
         width: 100%;
         box-sizing: border-box;
     }
+    .footer > #authZone {
+        display: contents;
+    }
+    .footer > #authZone > div {
+        display: contents;
+    }
+    .footer .footer-left, .footer .footer-right {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .footer .footer-right {
+        margin-left: auto;
+    }
+    .editable-point {
+        cursor: default;
+        font-weight: bold;
+    }
+    .editable-point.admin {
+        cursor: pointer;
+        text-decoration: underline dotted;
+    }
+    #stateLogin {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    #stateLogin { display: none; }
+    #mdpInput {
+        padding: 8px;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 5px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        font-size: 1rem;
+        width: 200px;
+    }
+    #mdpInput::placeholder { color: rgba(255,255,255,0.5); }
+    #loginError { color: #ff6b6b; margin: 5px 0; font-size: 0.9rem; }
 
     .squares {
         display: flex;
@@ -787,10 +829,52 @@
 </div>
 </div>
 
+    <!-- Bienvenue + pseudo zone (au-dessus du footer) -->
+    <div id="welcomeZone" style="display:none;text-align:center;padding:0.5rem 2rem;width:100%;box-sizing:border-box;">
+        <p id="welcomeMessage" style="font-size:1.2rem;font-weight:bold;margin:0;"></p>
+        <div id="pseudoEditZone" style="margin-top:5px;font-size:0.95rem;">
+            <a href="#" class="back-btn" id="btnEditPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Modifier pseudo</a>
+            <input type="text" id="pseudoInput" style="display:none;padding:4px 8px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;width:130px;" placeholder="Nouveau pseudo">
+            <a href="#" class="back-btn" id="btnSavePseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Enregistrer</a>
+            <a href="#" class="back-btn" id="btnCancelPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
+        </div>
+        <div id="teamPointsZone" style="margin-top:10px;font-size:1rem;">
+            Points de la team : <span id="teamWinsDisplay">???</span> / <span id="teamLossesDisplay">???</span>
+            <span id="teamPointsAdmin" style="display:none;">
+                <input type="number" id="teamWinsInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <span style="margin:0 2px;">/</span>
+                <input type="number" id="teamLossesInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">OK</a>
+                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
+            </span>
+        </div>
+    </div>
+
     <div class="footer">
-    <a href="#" class="back-btn">Se connecter</a>
-    <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
-</div>
+        <div id="authZone">
+            <!-- Non connecté -->
+            <div class="footer-left" id="stateButton">
+                <a href="#" class="back-btn" id="btnModifier">Se connecter</a>
+            </div>
+            <div class="footer-right" id="stateButtonRight">
+                <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
+            </div>
+            <!-- Mode login -->
+            <div id="stateLogin">
+                <input type="password" id="mdpInput" placeholder="Mot de passe">
+                <a href="#" class="back-btn" id="btnValider">Valider</a>
+                <a href="#" class="back-btn" id="btnFermerLogin">Fermer</a>
+                <p id="loginError"></p>
+            </div>
+            <!-- Connecté -->
+            <div class="footer-left" id="stateEdt" style="display:none;">
+                <a href="#" class="back-btn" id="btnDeconnexion">Se déconnecter</a>
+            </div>
+            <div class="footer-right" id="stateEdtRight" style="display:none;">
+                <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -827,6 +911,24 @@
     'yoru': 'img/agents/yoru.jpg'
   };
 
+  const NAME_TO_ID = {
+    "Morgane": "morgane",
+    "Enzo": "enzo",
+    "Jules": "jules",
+    "Sebastien": "sebastien",
+    "Orphée": "orphee",
+    "Octave": "octave",
+    "Clément": "clement"
+  };
+
+  function canEditSquare(name) {
+    const membreId = sessionStorage.getItem("membreId");
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    if (!membreId) return true; // pas connecté → localStorage
+    const targetId = NAME_TO_ID[name];
+    return membreId === targetId || isAdmin;
+  }
+
   function getMemberName(square) {
     return square.querySelector('.square-title').textContent.trim();
   }
@@ -849,7 +951,11 @@
   function saveConfig(square) {
     const name = getMemberName(square);
     const config = getConfig(square);
-    localStorage.setItem('agentConfig-' + name, JSON.stringify(config));
+    if (window.__saveAgentConfig) {
+      window.__saveAgentConfig(name, config);
+    } else {
+      localStorage.setItem('agentConfig-' + name, JSON.stringify(config));
+    }
   }
 
    function renderAgentDisplay(square, config) {
@@ -877,8 +983,7 @@
        return;
      }
 
-     inputs.classList.add('visible');
-     inputFields.forEach((input, i) => {
+      inputFields.forEach((input, i) => {
        input.style.display = i < count ? 'block' : 'none';
        if (i < count && agents[i]) input.value = agents[i];
        else if (i >= count) input.value = '';
@@ -931,6 +1036,11 @@
 
   function updateFromInput(input) {
     const square = input.closest('.square');
+    const name = getMemberName(square);
+    if (!canEditSquare(name)) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
     const val = input.value.trim().toLowerCase();
     if (!val) return;
     if (agentImages[val]) {
@@ -948,6 +1058,11 @@
 
   function handleToggleClick(toggle) {
     const square = toggle.closest('.square');
+    const name = getMemberName(square);
+    if (!canEditSquare(name)) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
     const choices = toggle.parentElement.querySelector('.agent-choices');
     const inputs = square.querySelector('.agent-inputs');
 
@@ -967,6 +1082,11 @@
 
   function handleOptClick(opt) {
     const square = opt.closest('.square');
+    const name = getMemberName(square);
+    if (!canEditSquare(name)) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
     const val = parseInt(opt.dataset.value);
 
     opt.parentElement.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
@@ -981,17 +1101,24 @@
   function restoreSaved() {
     document.querySelectorAll('.square').forEach(square => {
       const name = getMemberName(square);
-      const saved = localStorage.getItem('agentConfig-' + name);
-      if (saved) {
-        try {
-          const config = JSON.parse(saved);
-          const opt = square.querySelector(`.agent-opt[data-value="${config.count}"]`);
-          if (opt) {
-            square.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-          }
-          renderAgentDisplay(square, config);
-        } catch (e) {}
+      let config = null;
+      // Essayer Firestore d'abord
+      if (window.__agentConfigs && window.__agentConfigs[name]) {
+        config = window.__agentConfigs[name];
+      } else {
+        // Fallback localStorage
+        const saved = localStorage.getItem('agentConfig-' + name);
+        if (saved) {
+          try { config = JSON.parse(saved); } catch (e) {}
+        }
+      }
+      if (config) {
+        const opt = square.querySelector(`.agent-opt[data-value="${config.count}"]`);
+        if (opt) {
+          square.querySelectorAll('.agent-opt').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+        }
+        renderAgentDisplay(square, config);
       }
     });
   }
@@ -1044,15 +1171,13 @@
     }
   });
 
+  window.__restoreSaved = restoreSaved;
   restoreSaved();
 </script>
     <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getFirestore, collection, doc, getDocs, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyBTkuOD4jnR3tvmkAxKR5UM0nB6RNqWC1M",
     authDomain: "premierteam-plouf.firebaseapp.com",
@@ -1062,8 +1187,366 @@
     appId: "1:511246296521:web:2f4b07c682ee25dd6d3418"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const MEMBRES_DATA = [
+    { id: "morgane", nom: "Morgane", surnom: "MK", mdp: "14022019", mdp_admin: "Admin_mk_11" },
+    { id: "enzo", nom: "Enzo", surnom: "Misu", mdp: "2323", mdp_admin: "Admin_misu_12" },
+    { id: "jules", nom: "Jules", surnom: "FDM", mdp: "julesf0128" },
+    { id: "sebastien", nom: "Sébastien", surnom: "Pollux", mdp: "Honda06+" },
+    { id: "orphee", nom: "Orphée", surnom: "Orphée", mdp: "jemeraivoiralexiaenrobedechambre69" },
+    { id: "octave", nom: "Octave", surnom: "SacadUwU", mdp: "motdepasse.1" },
+    { id: "clement", nom: "Clément", surnom: "Clemrsse", mdp: "clemrsse123" }
+  ];
+
+  function showState(state) {
+    const stateButton = document.getElementById("stateButton");
+    const stateButtonRight = document.getElementById("stateButtonRight");
+    const stateLogin = document.getElementById("stateLogin");
+    const stateEdt = document.getElementById("stateEdt");
+    const stateEdtRight = document.getElementById("stateEdtRight");
+    const welcomeZone = document.getElementById("welcomeZone");
+    stateButton.style.display = "none";
+    if (stateButtonRight) stateButtonRight.style.display = "none";
+    stateLogin.style.display = "none";
+    stateEdt.style.display = "none";
+    if (stateEdtRight) stateEdtRight.style.display = "none";
+    welcomeZone.style.display = "none";
+    if (state === "button") { stateButton.style.display = "flex"; if (stateButtonRight) stateButtonRight.style.display = "flex"; }
+    else if (state === "login") { stateLogin.style.display = "flex"; }
+    else if (state === "edt") { stateEdt.style.display = "flex"; if (stateEdtRight) stateEdtRight.style.display = "flex"; welcomeZone.style.display = "block"; }
+  }
+
+  function getSurnom(id) {
+    const m = MEMBRES_DATA.find(m => m.id === id);
+    return m ? m.surnom : id;
+  }
+
+  let currentMembreId = null;
+  let currentIsAdmin = false;
+  let currentPseudo = "";
+
+  async function restoreSession() {
+    const savedId = sessionStorage.getItem("membreId");
+    const savedAdmin = sessionStorage.getItem("isAdmin");
+    if (savedId && savedAdmin !== null) {
+      currentMembreId = savedId;
+      currentIsAdmin = savedAdmin === "true";
+      currentPseudo = getSurnom(savedId);
+      try {
+        const snap = await getDoc(doc(db, "membres", savedId));
+        if (snap.exists() && snap.data().pseudo) {
+          currentPseudo = snap.data().pseudo;
+        }
+      } catch (e) {}
+      showState("edt");
+      const welcome = document.getElementById("welcomeMessage");
+      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(currentPseudo) : "Bienvenue " + getNickname(currentPseudo);
+      if (currentPseudo !== getSurnom(savedId)) {
+        updateValorantTag(savedId, currentPseudo);
+      }
+      document.getElementById("btnEditPseudo").style.display = "inline-block";
+      setupTeamPointsEdit();
+    }
+  }
+
+  document.getElementById("btnModifier").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("mdpInput").value = "";
+    document.getElementById("loginError").textContent = "";
+    showState("login");
+  });
+
+  document.getElementById("btnFermerLogin").addEventListener("click", (e) => {
+    e.preventDefault();
+    showState("button");
+  });
+
+  document.getElementById("btnValider").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const mdp = document.getElementById("mdpInput").value.trim();
+    if (!mdp) return;
+
+    const qAdmin = query(collection(db, "membres"), where("mdp_admin", "==", mdp));
+    const adminSnapshot = await getDocs(qAdmin);
+    let membreId = null;
+    let isAdmin = false;
+
+    if (adminSnapshot.size > 0) {
+      membreId = adminSnapshot.docs[0].id;
+      isAdmin = true;
+    } else {
+      const q = query(collection(db, "membres"), where("mdp", "==", mdp));
+      const snapshot = await getDocs(q);
+      if (snapshot.size > 0) {
+        membreId = snapshot.docs[0].id;
+        isAdmin = false;
+      }
+    }
+
+    if (!membreId) {
+      document.getElementById("loginError").textContent = "Mot de passe incorrect";
+      return;
+    }
+
+    currentMembreId = membreId;
+    currentIsAdmin = isAdmin;
+    sessionStorage.setItem("membreId", currentMembreId);
+    sessionStorage.setItem("isAdmin", currentIsAdmin);
+
+    currentPseudo = getSurnom(membreId);
+    try {
+      const snap = await getDoc(doc(db, "membres", membreId));
+      if (snap.exists() && snap.data().pseudo) {
+        currentPseudo = snap.data().pseudo;
+      }
+    } catch (e) {}
+
+    showState("edt");
+    const welcome = document.getElementById("welcomeMessage");
+    welcome.textContent = isAdmin ? "Bienvenue Admin " + getNickname(currentPseudo) : "Bienvenue " + getNickname(currentPseudo);
+    if (currentPseudo !== getSurnom(membreId)) {
+      updateValorantTag(membreId, currentPseudo);
+    }
+    document.getElementById("btnEditPseudo").style.display = "inline-block";
+    setupTeamPointsEdit();
+  });
+
+  document.getElementById("btnDeconnexion").addEventListener("click", (e) => {
+    e.preventDefault();
+    currentMembreId = null;
+    currentIsAdmin = false;
+    currentPseudo = "";
+    sessionStorage.removeItem("membreId");
+    sessionStorage.removeItem("isAdmin");
+    document.getElementById("btnEditPseudo").style.display = "none";
+    setupTeamPointsEdit();
+    showState("button");
+  });
+
+  // Pseudo editing
+  document.getElementById("btnEditPseudo").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("pseudoInput").value = currentPseudo;
+    document.getElementById("pseudoInput").style.display = "inline-block";
+    document.getElementById("btnSavePseudo").style.display = "inline-block";
+    document.getElementById("btnCancelPseudo").style.display = "inline-block";
+    document.getElementById("btnEditPseudo").style.display = "none";
+  });
+
+  document.getElementById("btnCancelPseudo").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("pseudoInput").style.display = "none";
+    document.getElementById("btnSavePseudo").style.display = "none";
+    document.getElementById("btnCancelPseudo").style.display = "none";
+    document.getElementById("btnEditPseudo").style.display = "inline-block";
+  });
+
+  function getNickname(val) {
+    const idx = val.indexOf('#');
+    return idx >= 0 ? val.substring(0, idx).trim() : val.trim();
+  }
+  function getTag(val) {
+    const idx = val.indexOf('#');
+    return idx >= 0 ? val.substring(idx).trim() : '';
+  }
+
+  function updateValorantTag(membreId, newPseudo) {
+    const entry = Object.entries(NAME_TO_ID).find(([, id]) => id === membreId);
+    if (!entry) return;
+    const memberName = entry[0];
+    const squares = document.querySelectorAll('.square');
+    for (const square of squares) {
+      const title = square.querySelector('.square-title');
+      if (title && title.textContent.trim() === memberName) {
+        const li = square.querySelector('.social-icon[src*="valorant"]');
+        if (li) {
+          const parent = li.closest('li');
+          if (parent) {
+            const nick = getNickname(newPseudo);
+            const tag = getTag(newPseudo) || (() => {
+              const text = parent.textContent.trim();
+              return text.includes('#') ? text.substring(text.indexOf('#')).trim() : '';
+            })();
+            parent.innerHTML = li.outerHTML + nick + ' ' + tag;
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  document.getElementById("btnSavePseudo").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const newPseudo = document.getElementById("pseudoInput").value.trim();
+    if (!newPseudo || !currentMembreId) return;
+    try {
+      await setDoc(doc(db, "membres", currentMembreId), { pseudo: newPseudo }, { merge: true });
+      currentPseudo = newPseudo;
+      const welcome = document.getElementById("welcomeMessage");
+      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(newPseudo) : "Bienvenue " + getNickname(newPseudo);
+      updateValorantTag(currentMembreId, newPseudo);
+      document.getElementById("pseudoInput").style.display = "none";
+      document.getElementById("btnSavePseudo").style.display = "none";
+      document.getElementById("btnCancelPseudo").style.display = "none";
+      document.getElementById("btnEditPseudo").style.display = "inline-block";
+    } catch (e) {
+      document.getElementById("loginError").textContent = "Erreur d'enregistrement";
+    }
+  });
+
+  document.getElementById("mdpInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("btnValider").click();
+  });
+
+  // --- Team points ---
+  let teamWins = null, teamLosses = null;
+
+  async function loadTeamPoints() {
+    try {
+      const snap = await getDoc(doc(db, "equipe", "stats"));
+      if (snap.exists()) {
+        const d = snap.data();
+        teamWins = d.wins != null ? d.wins : null;
+        teamLosses = d.losses != null ? d.losses : null;
+      }
+    } catch (e) {}
+    displayTeamPoints();
+  }
+
+  function displayTeamPoints() {
+    document.getElementById("teamWinsDisplay").textContent = teamWins != null ? teamWins : "???";
+    document.getElementById("teamLossesDisplay").textContent = teamLosses != null ? teamLosses : "???";
+  }
+
+  function setupTeamPointsEdit() {
+    const zone = document.getElementById("teamPointsAdmin");
+    const winsDisp = document.getElementById("teamWinsDisplay");
+    const lossesDisp = document.getElementById("teamLossesDisplay");
+    const winsInp = document.getElementById("teamWinsInput");
+    const lossesInp = document.getElementById("teamLossesInput");
+
+    if (currentIsAdmin) {
+      zone.style.display = "inline";
+      winsDisp.classList.add("admin");
+      lossesDisp.classList.add("admin");
+
+      winsDisp.onclick = (e) => {
+        e.stopPropagation();
+        winsInp.value = teamWins != null ? teamWins : "";
+        winsInp.style.display = "inline-block";
+        lossesInp.style.display = "none";
+        document.getElementById("btnSaveTeamPoints").style.display = "inline-block";
+        document.getElementById("btnCancelTeamPoints").style.display = "inline-block";
+        winsDisp.style.display = "none";
+        lossesDisp.style.display = "none";
+        winsInp.focus();
+      };
+      lossesDisp.onclick = (e) => {
+        e.stopPropagation();
+        lossesInp.value = teamLosses != null ? teamLosses : "";
+        lossesInp.style.display = "inline-block";
+        winsInp.style.display = "none";
+        document.getElementById("btnSaveTeamPoints").style.display = "inline-block";
+        document.getElementById("btnCancelTeamPoints").style.display = "inline-block";
+        winsDisp.style.display = "none";
+        lossesDisp.style.display = "none";
+        lossesInp.focus();
+      };
+    } else {
+      zone.style.display = "none";
+      winsDisp.classList.remove("admin");
+      lossesDisp.classList.remove("admin");
+      winsDisp.onclick = null;
+      lossesDisp.onclick = null;
+    }
+  }
+
+  document.getElementById("btnSaveTeamPoints").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const winsInp = document.getElementById("teamWinsInput");
+    const lossesInp = document.getElementById("teamLossesInput");
+    const newWins = winsInp.style.display !== "none" ? parseInt(winsInp.value) : teamWins;
+    const newLosses = lossesInp.style.display !== "none" ? parseInt(lossesInp.value) : teamLosses;
+    if (isNaN(newWins) || isNaN(newLosses)) return;
+    try {
+      await setDoc(doc(db, "equipe", "stats"), { wins: newWins, losses: newLosses });
+      teamWins = newWins;
+      teamLosses = newLosses;
+    } catch (e) {}
+    displayTeamPoints();
+    document.getElementById("teamWinsInput").style.display = "none";
+    document.getElementById("teamLossesInput").style.display = "none";
+    document.getElementById("btnSaveTeamPoints").style.display = "none";
+    document.getElementById("btnCancelTeamPoints").style.display = "none";
+    document.getElementById("teamWinsDisplay").style.display = "inline";
+    document.getElementById("teamLossesDisplay").style.display = "inline";
+  });
+
+  document.getElementById("btnCancelTeamPoints").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("teamWinsInput").style.display = "none";
+    document.getElementById("teamLossesInput").style.display = "none";
+    document.getElementById("btnSaveTeamPoints").style.display = "none";
+    document.getElementById("btnCancelTeamPoints").style.display = "none";
+    document.getElementById("teamWinsDisplay").style.display = "inline";
+    document.getElementById("teamLossesDisplay").style.display = "inline";
+  });
+
+  // --- Agent config Firestore ---
+  const NAME_TO_ID = {
+    "Morgane": "morgane",
+    "Enzo": "enzo",
+    "Jules": "jules",
+    "Sebastien": "sebastien",
+    "Orphée": "orphee",
+    "Octave": "octave",
+    "Clément": "clement"
+  };
+
+  window.__agentConfigs = {};
+
+  async function loadAgentConfigs() {
+    try {
+      const snapshot = await getDocs(collection(db, "membres"));
+      snapshot.forEach(doc => {
+        if (doc.data().agents) {
+          const entry = Object.entries(NAME_TO_ID).find(([, id]) => id === doc.id);
+          if (entry) {
+            window.__agentConfigs[entry[0]] = doc.data().agents;
+          }
+        }
+      });
+    } catch (e) {
+      console.error("Erreur chargement agents", e);
+    }
+    if (window.__restoreSaved) window.__restoreSaved();
+  }
+
+  window.__saveAgentConfig = async function(name, config) {
+    const id = NAME_TO_ID[name];
+    if (!id) return;
+    const savedId = sessionStorage.getItem("membreId");
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    if (savedId && savedId !== id && !isAdmin) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
+    try {
+      await setDoc(doc(db, "membres", id), { agents: config }, { merge: true });
+      window.__agentConfigs[name] = config;
+    } catch (e) {
+      console.error("Erreur sauvegarde agent", e);
+    }
+  };
+
+  loadAgentConfigs();
+
+  loadTeamPoints();
+  restoreSession();
+  // Run setupTeamPointsEdit after restore in case session is restored (it's also called inside restoreSession)
+  if (!sessionStorage.getItem("membreId")) setupTeamPointsEdit();
 </script>
         
 </body>
