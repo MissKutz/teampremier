@@ -45,6 +45,38 @@
         opacity: 0.7;
     }
 
+    .pseudo-edit-btn {
+        margin-left: 4px;
+        text-decoration: none;
+        font-size: 0.8rem;
+        cursor: pointer;
+        opacity: 0.5;
+        vertical-align: middle;
+    }
+    .pseudo-edit-btn:hover { opacity: 1; }
+    .pseudo-edit-input {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 4px;
+        color: #fff;
+        padding: 2px 6px;
+        font-size: 0.8rem;
+        width: 100px;
+        vertical-align: middle;
+    }
+    .pseudo-edit-ok, .pseudo-edit-cancel {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 4px;
+        color: #fff;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        margin-left: 3px;
+        vertical-align: middle;
+    }
+    .pseudo-edit-ok:hover, .pseudo-edit-cancel:hover { background: rgba(255,255,255,0.3); }
+
         .footer {
         margin-top: auto;
         display: flex;
@@ -509,14 +541,14 @@
 
 <div class="squares">
     <div class="row-4">
-            <div class="square">
+            <div class="square" data-member-id="morgane">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Morgane</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">MissKutz #519</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">MissKutz #519</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/874025171713921105" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/morgan_margaux5?igsh=MTcyaWtpMmw4cGhlag==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -547,14 +579,14 @@
     <button class="flip-btn">↻</button>
 </div>
 
-    <div class="square">
+    <div class="square" data-member-id="enzo">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Enzo</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">Misu #773</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">Misu #773</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1216782102515683381" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/enzo0_fr?igsh=MWw4c2N4bmZsNzhpbw==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -585,14 +617,14 @@
     <button class="flip-btn">↻</button>
 </div>
 
-    <div class="square">
+    <div class="square" data-member-id="jules">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Jules</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">quoi #GOAT</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">quoi #GOAT</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1225861361074966539" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/fdm0128?igsh=MW04b3ZudWRqM3Z6dA==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -623,14 +655,14 @@
     <button class="flip-btn">↻</button>
 </div>
 
-    <div class="square">
+    <div class="square" data-member-id="sebastien">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Sébastien</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">Pollux #PoPo</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">Pollux #PoPo</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1173028543370903614" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/sebpollux06?igsh=MXhodGtmYjU4YmJodQ==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -663,14 +695,14 @@
 </div>
 
 <div class="row-3">
-        <div class="square">
+        <div class="square" data-member-id="orphee">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Orphée</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">pawsocks lover #huh</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">pawsocks lover #huh</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1189140602554695760" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/howrphee?igsh=MTRyOHR0djNxZDB3Zw==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -701,14 +733,14 @@
     <button class="flip-btn">↻</button>
 </div>
 
-    <div class="square">
+    <div class="square" data-member-id="octave">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Octave</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">Sacaduwu #Ytem</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">Sacaduwu #Ytem</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1247622815851483137" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/octave.dprz?igsh=MW5kb3c4Y3o4dWtmMQ==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -739,14 +771,14 @@
     <button class="flip-btn">↻</button>
 </div>  
 
-    <div class="square">
+    <div class="square" data-member-id="clement">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Clément</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-               <li><img src="img/valorant.svg" class="social-icon">Clemrsse #2609</li>
+               <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">Clemrsse #2609</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1294434297159094273" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/clem.rsse?igsh=cDloaWtpcG4zd2Y0" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -782,12 +814,7 @@
     <!-- Bienvenue + pseudo zone (au-dessus du footer) -->
     <div id="welcomeZone" style="display:none;text-align:center;padding:0.5rem 2rem;width:100%;box-sizing:border-box;">
         <p id="welcomeMessage" style="font-size:1.2rem;font-weight:bold;margin:0;"></p>
-        <div id="pseudoEditZone" style="margin-top:5px;font-size:0.95rem;">
-            <a href="#" class="back-btn" id="btnEditPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Modifier pseudo</a>
-            <input type="text" id="pseudoInput" style="display:none;padding:4px 8px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;width:130px;" placeholder="Nouveau pseudo">
-            <a href="#" class="back-btn" id="btnSavePseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Enregistrer</a>
-            <a href="#" class="back-btn" id="btnCancelPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
-        </div>
+        <!-- l'édition du pseudo se fait directement sur les cartes -->
     </div>
 
     <div class="footer">
@@ -1060,6 +1087,81 @@
         }
         renderAgentDisplay(square, config);
       }
+      updatePseudoEditButtons();
+    });
+  }
+
+  function updatePseudoEditButtons() {
+    const membreId = sessionStorage.getItem("membreId");
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    document.querySelectorAll('.square').forEach(square => {
+        const name = getMemberName(square);
+        const targetId = NAME_TO_ID[name];
+        const canEdit = membreId && (membreId === targetId || isAdmin);
+        const btn = square.querySelector('.pseudo-edit-btn');
+        if (btn) btn.style.display = canEdit ? 'inline' : 'none';
+    });
+  }
+
+  window.__updatePseudoEditButtons = updatePseudoEditButtons;
+  
+  function startPseudoEdit(btn) {
+    const li = btn.closest('li');
+    const pseudoText = li.querySelector('.pseudo-text');
+    const currentText = pseudoText.textContent.trim();
+
+    pseudoText.style.display = 'none';
+    btn.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'pseudo-edit-input';
+    input.value = currentText;
+
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'OK';
+    okBtn.className = 'pseudo-edit-ok';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = '✕';
+    cancelBtn.className = 'pseudo-edit-cancel';
+
+    li.appendChild(input);
+    li.appendChild(okBtn);
+    li.appendChild(cancelBtn);
+    input.focus();
+    input.select();
+
+    function endEdit(save) {
+        if (save) {
+        const newVal = input.value.trim();
+        if (newVal && newVal !== currentText) {
+            const square = li.closest('.square');
+            const memberId = square.dataset.memberId;
+            if (window.__saveMemberPseudo) {
+            window.__saveMemberPseudo(memberId, newVal);
+            }
+            pseudoText.textContent = newVal;
+            }
+        }
+        pseudoText.style.display = 'inline';
+        const membreId = sessionStorage.getItem("membreId");
+        const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+        const name = getMemberName(li.closest('.square'));
+        const targetId = NAME_TO_ID[name];
+        if (membreId && (membreId === targetId || isAdmin)) {
+        btn.style.display = 'inline';
+        }
+        input.remove();
+        okBtn.remove();
+        cancelBtn.remove();
+    }
+
+    okBtn.addEventListener('click', () => endEdit(true));
+    cancelBtn.addEventListener('click', () => endEdit(false));
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') endEdit(true);
+        else if (e.key === 'Escape') endEdit(false);
     });
   }
 
@@ -1075,6 +1177,12 @@
     const opt = e.target.closest('.agent-opt');
     if (opt) {
       handleOptClick(opt);
+    }
+    const pseudoBtn = e.target.closest('.pseudo-edit-btn');
+    if (pseudoBtn) {
+        e.preventDefault();
+        startPseudoEdit(pseudoBtn);
+        return;
     }
   });
 
@@ -1180,6 +1288,12 @@
           currentPseudo = snap.data().pseudo;
         }
       } catch (e) {}
+      // Charger le pseudo Firestore de la session dans le pseudo-text de la carte
+        const square = document.querySelector(`.square[data-member-id="${savedId}"]`);
+        if (square) {
+        const span = square.querySelector('.pseudo-text');
+        if (span) span.textContent = currentPseudo;
+        }
       showState("edt");
       const welcome = document.getElementById("welcomeMessage");
       welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(currentPseudo) : "Bienvenue " + getNickname(currentPseudo);
@@ -1188,6 +1302,7 @@
       }
       document.getElementById("btnEditPseudo").style.display = "inline-block";
       setupTeamPointsEdit();
+      if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
     }
   }
 
@@ -1251,6 +1366,7 @@
     }
     document.getElementById("btnEditPseudo").style.display = "inline-block";
     setupTeamPointsEdit();
+    if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
   });
 
   document.getElementById("btnDeconnexion").addEventListener("click", (e) => {
@@ -1262,6 +1378,7 @@
     sessionStorage.removeItem("isAdmin");
     document.getElementById("btnEditPseudo").style.display = "none";
     setupTeamPointsEdit();
+    if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
     showState("button");
   });
 
@@ -1453,6 +1570,19 @@
       console.error("Erreur sauvegarde agent", e);
     }
   };
+
+  window.__saveMemberPseudo = async function(memberId, newPseudo) {
+    try {
+        await setDoc(doc(db, "membres", memberId), { pseudo: newPseudo }, { merge: true });
+        if (memberId === currentMembreId) {
+        currentPseudo = newPseudo;
+        const welcome = document.getElementById("welcomeMessage");
+        welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(newPseudo) : "Bienvenue " + getNickname(newPseudo);
+        }
+    } catch (e) {
+        console.error("Erreur sauvegarde pseudo", e);
+    }
+    };
 
   loadAgentConfigs();
 
