@@ -68,14 +68,7 @@
     .footer .footer-right {
         margin-left: auto;
     }
-    .editable-point {
-        cursor: default;
-        font-weight: bold;
-    }
-    .editable-point.admin {
-        cursor: pointer;
-        text-decoration: underline dotted;
-    }
+
     #stateLogin {
         display: flex;
         align-items: center;
@@ -502,14 +495,15 @@
     <div class="container">
         <h1 class="gradient-text" style="font-family: 'EB Garamond'; font-size: 4.0rem;">Plastic4ever</h1>
         <h2 class="gradient-text" style="font-family: 'EB Garamond', serif;margin-top: -1rem;">#plouf</h2>
-        <p class="gradient-text" style="font-family: 'PlayfairDisplay', serif;">Points de la team : <span id="teamWinsDisplay">???</span> / <span id="teamLossesDisplay">???</span>
-            <span id="teamPointsAdmin" style="display:none;">
-                <input type="number" id="teamWinsInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+        <p class="gradient-text" style="font-family: 'PlayfairDisplay', serif;">Points de la team : <span id="teamPointsText">??? / ???</span>
+            <span id="teamPointsInputs" style="display:none;">
+                <input type="number" id="teamWinsInput" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
                 <span style="margin:0 2px;">/</span>
-                <input type="number" id="teamLossesInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
-                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">OK</a>
-                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
+                <input type="number" id="teamLossesInput" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="font-size:0.85rem;padding:2px 8px;">OK</a>
+                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="font-size:0.85rem;padding:2px 8px;">Annuler</a>
             </span>
+            <a href="#" class="back-btn" id="btnEditTeamPoints" style="display:none;font-size:0.85rem;padding:2px 8px;">Modifier</a>
         </p>
     </div>
 
@@ -1358,86 +1352,59 @@
         teamLosses = d.losses != null ? d.losses : null;
       }
     } catch (e) {}
-    displayTeamPoints();
+    updateTeamPointsDisplay();
   }
 
-  function displayTeamPoints() {
-    document.getElementById("teamWinsDisplay").textContent = teamWins != null ? teamWins : "???";
-    document.getElementById("teamLossesDisplay").textContent = teamLosses != null ? teamLosses : "???";
+  function updateTeamPointsDisplay() {
+    document.getElementById("teamPointsText").textContent =
+      (teamWins != null ? teamWins : "???") + " / " + (teamLosses != null ? teamLosses : "???");
   }
 
-  function setupTeamPointsEdit() {
-    const zone = document.getElementById("teamPointsAdmin");
-    const winsDisp = document.getElementById("teamWinsDisplay");
-    const lossesDisp = document.getElementById("teamLossesDisplay");
-    const winsInp = document.getElementById("teamWinsInput");
-    const lossesInp = document.getElementById("teamLossesInput");
-
-    if (currentIsAdmin) {
-      zone.style.display = "inline";
-      winsDisp.classList.add("admin");
-      lossesDisp.classList.add("admin");
-
-      winsDisp.onclick = (e) => {
-        e.stopPropagation();
-        winsInp.value = teamWins != null ? teamWins : "";
-        winsInp.style.display = "inline-block";
-        lossesInp.style.display = "none";
-        document.getElementById("btnSaveTeamPoints").style.display = "inline-block";
-        document.getElementById("btnCancelTeamPoints").style.display = "inline-block";
-        winsDisp.style.display = "none";
-        lossesDisp.style.display = "none";
-        winsInp.focus();
-      };
-      lossesDisp.onclick = (e) => {
-        e.stopPropagation();
-        lossesInp.value = teamLosses != null ? teamLosses : "";
-        lossesInp.style.display = "inline-block";
-        winsInp.style.display = "none";
-        document.getElementById("btnSaveTeamPoints").style.display = "inline-block";
-        document.getElementById("btnCancelTeamPoints").style.display = "inline-block";
-        winsDisp.style.display = "none";
-        lossesDisp.style.display = "none";
-        lossesInp.focus();
-      };
-    } else {
-      zone.style.display = "none";
-      winsDisp.classList.remove("admin");
-      lossesDisp.classList.remove("admin");
-      winsDisp.onclick = null;
-      lossesDisp.onclick = null;
+  function showTeamPointsEdit(show) {
+    document.getElementById("teamPointsText").style.display = show ? "none" : "inline";
+    document.getElementById("teamPointsInputs").style.display = show ? "inline" : "none";
+    document.getElementById("btnEditTeamPoints").style.display = show ? "none" : (currentIsAdmin ? "inline-block" : "none");
+    if (show) {
+      document.getElementById("teamWinsInput").value = teamWins != null ? teamWins : "";
+      document.getElementById("teamLossesInput").value = teamLosses != null ? teamLosses : "";
     }
   }
 
+  function setupTeamPointsEdit() {
+    document.getElementById("btnEditTeamPoints").style.display = currentIsAdmin ? "inline-block" : "none";
+    showTeamPointsEdit(false);
+  }
+
+  document.getElementById("btnEditTeamPoints").addEventListener("click", (e) => {
+    e.preventDefault();
+    showTeamPointsEdit(true);
+    document.getElementById("teamWinsInput").focus();
+  });
+
   document.getElementById("btnSaveTeamPoints").addEventListener("click", async (e) => {
     e.preventDefault();
-    const winsInp = document.getElementById("teamWinsInput");
-    const lossesInp = document.getElementById("teamLossesInput");
-    const newWins = winsInp.style.display !== "none" ? parseInt(winsInp.value) : teamWins;
-    const newLosses = lossesInp.style.display !== "none" ? parseInt(lossesInp.value) : teamLosses;
-    if (isNaN(newWins) || isNaN(newLosses)) return;
+    const w = parseInt(document.getElementById("teamWinsInput").value);
+    const l = parseInt(document.getElementById("teamLossesInput").value);
+    if (isNaN(w) || isNaN(l)) return;
     try {
-      await setDoc(doc(db, "equipe", "stats"), { wins: newWins, losses: newLosses });
-      teamWins = newWins;
-      teamLosses = newLosses;
+      await setDoc(doc(db, "equipe", "stats"), { wins: w, losses: l });
+      teamWins = w;
+      teamLosses = l;
     } catch (e) {}
-    displayTeamPoints();
-    document.getElementById("teamWinsInput").style.display = "none";
-    document.getElementById("teamLossesInput").style.display = "none";
-    document.getElementById("btnSaveTeamPoints").style.display = "none";
-    document.getElementById("btnCancelTeamPoints").style.display = "none";
-    document.getElementById("teamWinsDisplay").style.display = "inline";
-    document.getElementById("teamLossesDisplay").style.display = "inline";
+    updateTeamPointsDisplay();
+    showTeamPointsEdit(false);
   });
 
   document.getElementById("btnCancelTeamPoints").addEventListener("click", (e) => {
     e.preventDefault();
-    document.getElementById("teamWinsInput").style.display = "none";
-    document.getElementById("teamLossesInput").style.display = "none";
-    document.getElementById("btnSaveTeamPoints").style.display = "none";
-    document.getElementById("btnCancelTeamPoints").style.display = "none";
-    document.getElementById("teamWinsDisplay").style.display = "inline";
-    document.getElementById("teamLossesDisplay").style.display = "inline";
+    showTeamPointsEdit(false);
+  });
+
+  document.getElementById("teamWinsInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("btnSaveTeamPoints").click();
+  });
+  document.getElementById("teamLossesInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("btnSaveTeamPoints").click();
   });
 
   // --- Agent config Firestore ---
