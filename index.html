@@ -21,6 +21,48 @@
             text-align: center;
             padding: 2rem;
         }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            background: transparent;
+            border-radius: 0;
+            border: none;
+        }
+
+        .header-logo {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 0;
+            background: transparent;
+            padding: 0;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        .header-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .header-logo-left {
+            order: 1;
+        }
+
+        .header-logo-right {
+            order: 3;
+        }
+
+        .header-title-block {
+            order: 2;
+            text-align: center;
+            flex: 1;
+        }
         h1 {
             font-size: 3rem;
             margin-bottom: 1rem;
@@ -533,8 +575,15 @@
                 padding: 10px;
                 overflow-x: hidden;
             }
-            .container {
-                padding: 1rem 0.5rem;
+            .header-container {
+                flex-direction: column;
+                padding: 0.5rem;
+            }
+            .header-logo-left, .header-logo-right {
+                order: 2;
+            }
+            .header-title-block {
+                order: 1;
             }
             h1 {
                 font-size: 2rem;
@@ -640,23 +689,31 @@
                 width: 50px;
                 height: 50px;
             }
+            .header-logo {
+                width: 100px;
+                height: 100px;
+            }
         }
  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="gradient-text" style="font-family: 'EB Garamond'; font-size: 4.0rem;">Plastic4ever</h1>
-        <h2 class="gradient-text" style="font-family: 'EB Garamond', serif;margin-top: -1rem;">#plouf</h2>
-        <p class="gradient-text" style="font-family: 'Playfair Display', serif;">Points de la team : <span id="teamPointsText">??? / ???</span>
-            <span id="teamPointsInputs" style="display:none;">
-                <input type="number" id="teamWinsInput" step="25" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
-                <span style="margin:0 2px;">/</span>
-                <input type="number" id="teamLossesInput" step="25" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
-                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="font-size:0.85rem;padding:2px 8px;">OK</a>
-                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="font-size:0.85rem;padding:2px 8px;">Annuler</a>
-            </span>
-            <a href="#" class="back-btn" id="btnEditTeamPoints" style="display:none;font-size:0.85rem;padding:2px 8px;">Modifier</a>
-        </p>
+    <div class="header-container">
+        <img src="img/image.teampremier.webp" alt="Logo" class="header-logo header-logo-left">
+        <div class="header-title-block">
+            <h1 class="gradient-text" style="font-family: 'EB Garamond'; font-size: 4.0rem;">Plastic4ever</h1>
+            <h2 class="gradient-text" style="font-family: 'EB Garamond', serif;margin-top: -1rem;">#plouf</h2>
+            <p class="gradient-text" style="font-family: 'Playfair Display', serif;">Points de la team : <span id="teamPointsText">??? / ???</span>
+                <span id="teamPointsInputs" style="display:none;">
+                    <input type="number" id="teamWinsInput" step="25" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                    <span style="margin:0 2px;">/</span>
+                    <input type="number" id="teamLossesInput" step="25" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                    <a href="#" class="back-btn" id="btnSaveTeamPoints" style="font-size:0.85rem;padding:2px 8px;">OK</a>
+                    <a href="#" class="back-btn" id="btnCancelTeamPoints" style="font-size:0.85rem;padding:2px 8px;">Annuler</a>
+                </span>
+                <a href="#" class="back-btn" id="btnEditTeamPoints" style="display:none;font-size:0.85rem;padding:2px 8px;">Modifier</a>
+            </p>
+        </div>
+        <img src="img/image.teampremier.webp" alt="Logo" class="header-logo header-logo-right">
     </div>
 
 <div class="squares">
