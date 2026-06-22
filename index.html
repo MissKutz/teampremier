@@ -147,6 +147,9 @@
     .footer > #authZone > div {
         display: contents;
     }
+    .footer > #authZone > #stateLogin {
+        display: none;
+    }
     .footer .footer-left, .footer .footer-right {
         display: flex;
         gap: 10px;
@@ -1781,6 +1784,8 @@
         console.error("Erreur sauvegarde pseudo", e);
     }
     };
+
+  showState("button");
 
   loadAgentConfigs();
 
