@@ -68,6 +68,14 @@
     .footer .footer-right {
         margin-left: auto;
     }
+    .editable-point {
+        cursor: default;
+        font-weight: bold;
+    }
+    .editable-point.admin {
+        cursor: pointer;
+        text-decoration: underline dotted;
+    }
     #stateLogin {
         display: flex;
         align-items: center;
@@ -778,6 +786,16 @@
             <a href="#" class="back-btn" id="btnSavePseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Enregistrer</a>
             <a href="#" class="back-btn" id="btnCancelPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
         </div>
+        <div id="teamPointsZone" style="margin-top:10px;font-size:1rem;">
+            Points de la team : <span id="teamWinsDisplay">???</span> / <span id="teamLossesDisplay">???</span>
+            <span id="teamPointsAdmin" style="display:none;">
+                <input type="number" id="teamWinsInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <span style="margin:0 2px;">/</span>
+                <input type="number" id="teamLossesInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">OK</a>
+                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
+            </span>
+        </div>
     </div>
 
     <div class="footer">
@@ -1177,6 +1195,7 @@
         updateValorantTag(savedId, currentPseudo);
       }
       document.getElementById("btnEditPseudo").style.display = "inline-block";
+      setupTeamPointsEdit();
     }
   }
 
@@ -1239,6 +1258,7 @@
       updateValorantTag(membreId, currentPseudo);
     }
     document.getElementById("btnEditPseudo").style.display = "inline-block";
+    setupTeamPointsEdit();
   });
 
   document.getElementById("btnDeconnexion").addEventListener("click", (e) => {
@@ -1249,6 +1269,7 @@
     sessionStorage.removeItem("membreId");
     sessionStorage.removeItem("isAdmin");
     document.getElementById("btnEditPseudo").style.display = "none";
+    setupTeamPointsEdit();
     showState("button");
   });
 
@@ -1312,7 +1333,7 @@
       await setDoc(doc(db, "membres", currentMembreId), { pseudo: newPseudo }, { merge: true });
       currentPseudo = newPseudo;
       const welcome = document.getElementById("welcomeMessage");
-      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + newPseudo : "Bienvenue " + newPseudo;
+      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(newPseudo) : "Bienvenue " + getNickname(newPseudo);
       updateValorantTag(currentMembreId, newPseudo);
       document.getElementById("pseudoInput").style.display = "none";
       document.getElementById("btnSavePseudo").style.display = "none";
@@ -1325,6 +1346,100 @@
 
   document.getElementById("mdpInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") document.getElementById("btnValider").click();
+  });
+
+  // --- Team points ---
+  let teamWins = null, teamLosses = null;
+
+  async function loadTeamPoints() {
+    try {
+      const snap = await getDoc(doc(db, "equipe", "stats"));
+      if (snap.exists()) {
+        const d = snap.data();
+        teamWins = d.wins != null ? d.wins : null;
+        teamLosses = d.losses != null ? d.losses : null;
+      }
+    } catch (e) {}
+    displayTeamPoints();
+  }
+
+  function displayTeamPoints() {
+    document.getElementById("teamWinsDisplay").textContent = teamWins != null ? teamWins : "???";
+    document.getElementById("teamLossesDisplay").textContent = teamLosses != null ? teamLosses : "???";
+  }
+
+  function setupTeamPointsEdit() {
+    const zone = document.getElementById("teamPointsAdmin");
+    const winsDisp = document.getElementById("teamWinsDisplay");
+    const lossesDisp = document.getElementById("teamLossesDisplay");
+    const winsInp = document.getElementById("teamWinsInput");
+    const lossesInp = document.getElementById("teamLossesInput");
+
+    if (currentIsAdmin) {
+      zone.style.display = "inline";
+      winsDisp.classList.add("admin");
+      lossesDisp.classList.add("admin");
+
+      winsDisp.onclick = (e) => {
+        e.stopPropagation();
+        winsInp.value = teamWins != null ? teamWins : "";
+        winsInp.style.display = "inline-block";
+        lossesInp.style.display = "none";
+        document.getElementById("btnSaveTeamPoints").style.display = "inline-block";
+        document.getElementById("btnCancelTeamPoints").style.display = "inline-block";
+        winsDisp.style.display = "none";
+        lossesDisp.style.display = "none";
+        winsInp.focus();
+      };
+      lossesDisp.onclick = (e) => {
+        e.stopPropagation();
+        lossesInp.value = teamLosses != null ? teamLosses : "";
+        lossesInp.style.display = "inline-block";
+        winsInp.style.display = "none";
+        document.getElementById("btnSaveTeamPoints").style.display = "inline-block";
+        document.getElementById("btnCancelTeamPoints").style.display = "inline-block";
+        winsDisp.style.display = "none";
+        lossesDisp.style.display = "none";
+        lossesInp.focus();
+      };
+    } else {
+      zone.style.display = "none";
+      winsDisp.classList.remove("admin");
+      lossesDisp.classList.remove("admin");
+      winsDisp.onclick = null;
+      lossesDisp.onclick = null;
+    }
+  }
+
+  document.getElementById("btnSaveTeamPoints").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const winsInp = document.getElementById("teamWinsInput");
+    const lossesInp = document.getElementById("teamLossesInput");
+    const newWins = winsInp.style.display !== "none" ? parseInt(winsInp.value) : teamWins;
+    const newLosses = lossesInp.style.display !== "none" ? parseInt(lossesInp.value) : teamLosses;
+    if (isNaN(newWins) || isNaN(newLosses)) return;
+    try {
+      await setDoc(doc(db, "equipe", "stats"), { wins: newWins, losses: newLosses });
+      teamWins = newWins;
+      teamLosses = newLosses;
+    } catch (e) {}
+    displayTeamPoints();
+    document.getElementById("teamWinsInput").style.display = "none";
+    document.getElementById("teamLossesInput").style.display = "none";
+    document.getElementById("btnSaveTeamPoints").style.display = "none";
+    document.getElementById("btnCancelTeamPoints").style.display = "none";
+    document.getElementById("teamWinsDisplay").style.display = "inline";
+    document.getElementById("teamLossesDisplay").style.display = "inline";
+  });
+
+  document.getElementById("btnCancelTeamPoints").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("teamWinsInput").style.display = "none";
+    document.getElementById("teamLossesInput").style.display = "none";
+    document.getElementById("btnSaveTeamPoints").style.display = "none";
+    document.getElementById("btnCancelTeamPoints").style.display = "none";
+    document.getElementById("teamWinsDisplay").style.display = "inline";
+    document.getElementById("teamLossesDisplay").style.display = "inline";
   });
 
   // --- Agent config Firestore ---
@@ -1376,7 +1491,10 @@
 
   loadAgentConfigs();
 
+  loadTeamPoints();
   restoreSession();
+  // Run setupTeamPointsEdit after restore in case session is restored (it's also called inside restoreSession)
+  if (!sessionStorage.getItem("membreId")) setupTeamPointsEdit();
 </script>
         
 </body>
