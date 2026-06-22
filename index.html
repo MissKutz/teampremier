@@ -1300,7 +1300,6 @@
       if (currentPseudo !== getSurnom(savedId)) {
         updateValorantTag(savedId, currentPseudo);
       }
-      document.getElementById("btnEditPseudo").style.display = "inline-block";
       setupTeamPointsEdit();
       if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
     }
@@ -1364,7 +1363,6 @@
     if (currentPseudo !== getSurnom(membreId)) {
       updateValorantTag(membreId, currentPseudo);
     }
-    document.getElementById("btnEditPseudo").style.display = "inline-block";
     setupTeamPointsEdit();
     if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
   });
@@ -1376,82 +1374,21 @@
     currentPseudo = "";
     sessionStorage.removeItem("membreId");
     sessionStorage.removeItem("isAdmin");
-    document.getElementById("btnEditPseudo").style.display = "none";
     setupTeamPointsEdit();
     if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
     showState("button");
-  });
-
-  // Pseudo editing
-  document.getElementById("btnEditPseudo").addEventListener("click", (e) => {
-    e.preventDefault();
-    document.getElementById("pseudoInput").value = currentPseudo;
-    document.getElementById("pseudoInput").style.display = "inline-block";
-    document.getElementById("btnSavePseudo").style.display = "inline-block";
-    document.getElementById("btnCancelPseudo").style.display = "inline-block";
-    document.getElementById("btnEditPseudo").style.display = "none";
-  });
-
-  document.getElementById("btnCancelPseudo").addEventListener("click", (e) => {
-    e.preventDefault();
-    document.getElementById("pseudoInput").style.display = "none";
-    document.getElementById("btnSavePseudo").style.display = "none";
-    document.getElementById("btnCancelPseudo").style.display = "none";
-    document.getElementById("btnEditPseudo").style.display = "inline-block";
   });
 
   function getNickname(val) {
     const idx = val.indexOf('#');
     return idx >= 0 ? val.substring(0, idx).trim() : val.trim();
   }
-  function getTag(val) {
-    const idx = val.indexOf('#');
-    return idx >= 0 ? val.substring(idx).trim() : '';
-  }
-
   function updateValorantTag(membreId, newPseudo) {
-    const entry = Object.entries(NAME_TO_ID).find(([, id]) => id === membreId);
-    if (!entry) return;
-    const memberName = entry[0];
-    const squares = document.querySelectorAll('.square');
-    for (const square of squares) {
-      const title = square.querySelector('.square-title');
-      if (title && title.textContent.trim() === memberName) {
-        const li = square.querySelector('.social-icon[src*="valorant"]');
-        if (li) {
-          const parent = li.closest('li');
-          if (parent) {
-            const nick = getNickname(newPseudo);
-            const tag = getTag(newPseudo) || (() => {
-              const text = parent.textContent.trim();
-              return text.includes('#') ? text.substring(text.indexOf('#')).trim() : '';
-            })();
-            parent.innerHTML = li.outerHTML + nick + ' ' + tag;
-          }
-        }
-        break;
-      }
-    }
+    const square = document.querySelector(`.square[data-member-id="${membreId}"]`);
+    if (!square) return;
+    const span = square.querySelector('.pseudo-text');
+    if (span) span.textContent = newPseudo;
   }
-
-  document.getElementById("btnSavePseudo").addEventListener("click", async (e) => {
-    e.preventDefault();
-    const newPseudo = document.getElementById("pseudoInput").value.trim();
-    if (!newPseudo || !currentMembreId) return;
-    try {
-      await setDoc(doc(db, "membres", currentMembreId), { pseudo: newPseudo }, { merge: true });
-      currentPseudo = newPseudo;
-      const welcome = document.getElementById("welcomeMessage");
-      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(newPseudo) : "Bienvenue " + getNickname(newPseudo);
-      updateValorantTag(currentMembreId, newPseudo);
-      document.getElementById("pseudoInput").style.display = "none";
-      document.getElementById("btnSavePseudo").style.display = "none";
-      document.getElementById("btnCancelPseudo").style.display = "none";
-      document.getElementById("btnEditPseudo").style.display = "inline-block";
-    } catch (e) {
-      document.getElementById("loginError").textContent = "Erreur d'enregistrement";
-    }
-  });
 
   document.getElementById("mdpInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") document.getElementById("btnValider").click();
