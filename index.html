@@ -45,15 +45,35 @@
         opacity: 0.7;
     }
 
-    .footer {
+        .footer {
         margin-top: auto;
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         align-items: center;
+        justify-content: center;
         padding: 1rem 2rem;
         width: 100%;
         box-sizing: border-box;
     }
+    #stateButton, #stateLogin, #stateEdt {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    #stateLogin, #stateEdt { display: none; }
+    #mdpInput {
+        padding: 8px;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 5px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        font-size: 1rem;
+        width: 200px;
+    }
+    #mdpInput::placeholder { color: rgba(255,255,255,0.5); }
+    #loginError { color: #ff6b6b; margin: 5px 0; font-size: 0.9rem; }
 
     .squares {
         display: flex;
@@ -736,8 +756,32 @@
 </div>
 
     <div class="footer">
-    <a href="#" class="back-btn">Se connecter</a>
-    <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
+    <div id="authZone" style="text-align:center;">
+        <div id="stateButton">
+            <a href="#" class="back-btn" id="btnModifier">Se connecter</a>
+            <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
+        </div>
+        <div id="stateLogin">
+            <input type="password" id="mdpInput" placeholder="Mot de passe">
+            <a href="#" class="back-btn" id="btnValider">Valider</a>
+            <a href="#" class="back-btn" id="btnFermerLogin">Fermer</a>
+            <p id="loginError"></p>
+        </div>
+        <div id="stateEdt">
+            <p id="welcomeMessage" style="font-size:1.2rem;font-weight:bold;margin:5px 0;"></p>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">
+                <span id="pseudoDisplay" style="font-size:1rem;"></span>
+                <a href="#" class="back-btn" id="btnEditPseudo" style="display:none;">Modifier pseudo</a>
+                <input type="text" id="pseudoInput" style="display:none;padding:8px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;width:150px;" placeholder="Nouveau pseudo">
+                <a href="#" class="back-btn" id="btnSavePseudo" style="display:none;">Enregistrer</a>
+                <a href="#" class="back-btn" id="btnCancelPseudo" style="display:none;">Annuler</a>
+            </div>
+            <div style="margin-top:10px;">
+                <a href="schedule.html" class="back-btn" id="btnGoSchedule">Voir/modifier le calendrier</a>
+                <a href="#" class="back-btn" id="btnDeconnexion">Se déconnecter</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -995,12 +1039,9 @@
   restoreSaved();
 </script>
     <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getFirestore, collection, doc, getDocs, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyBTkuOD4jnR3tvmkAxKR5UM0nB6RNqWC1M",
     authDomain: "premierteam-plouf.firebaseapp.com",
@@ -1010,8 +1051,172 @@
     appId: "1:511246296521:web:2f4b07c682ee25dd6d3418"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const MEMBRES_DATA = [
+    { id: "morgane", nom: "Morgane", surnom: "MK", mdp: "14022019", mdp_admin: "Admin_mk_11" },
+    { id: "enzo", nom: "Enzo", surnom: "Misu", mdp: "2323", mdp_admin: "Admin_misu_12" },
+    { id: "jules", nom: "Jules", surnom: "FDM", mdp: "julesf0128" },
+    { id: "sebastien", nom: "Sébastien", surnom: "Pollux", mdp: "Honda06+" },
+    { id: "orphee", nom: "Orphée", surnom: "Orphée", mdp: "jemeraivoiralexiaenrobedechambre69" },
+    { id: "octave", nom: "Octave", surnom: "SacadUwU", mdp: "motdepasse.1" },
+    { id: "clement", nom: "Clément", surnom: "Clemrsse", mdp: "clemrsse123" }
+  ];
+
+  function showState(state) {
+    document.getElementById("stateButton").style.display = "none";
+    document.getElementById("stateLogin").style.display = "none";
+    document.getElementById("stateEdt").style.display = "none";
+    if (state === "button") document.getElementById("stateButton").style.display = "flex";
+    else if (state === "login") document.getElementById("stateLogin").style.display = "flex";
+    else if (state === "edt") document.getElementById("stateEdt").style.display = "block";
+  }
+
+  function getSurnom(id) {
+    const m = MEMBRES_DATA.find(m => m.id === id);
+    return m ? m.surnom : id;
+  }
+
+  let currentMembreId = null;
+  let currentIsAdmin = false;
+
+  async function restoreSession() {
+    const savedId = sessionStorage.getItem("membreId");
+    const savedAdmin = sessionStorage.getItem("isAdmin");
+    if (savedId && savedAdmin !== null) {
+      currentMembreId = savedId;
+      currentIsAdmin = savedAdmin === "true";
+      // Récupérer le pseudo Firestore s'il existe
+      let displayPseudo = getSurnom(savedId);
+      try {
+        const snap = await getDoc(doc(db, "membres", savedId));
+        if (snap.exists() && snap.data().pseudo) {
+          displayPseudo = snap.data().pseudo;
+        }
+      } catch (e) {}
+      showState("edt");
+      const welcome = document.getElementById("welcomeMessage");
+      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + displayPseudo : "Bienvenue " + displayPseudo;
+      document.getElementById("pseudoDisplay").textContent = displayPseudo;
+      document.getElementById("btnEditPseudo").style.display = "inline-block";
+    }
+  }
+
+  document.getElementById("btnModifier").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("mdpInput").value = "";
+    document.getElementById("loginError").textContent = "";
+    showState("login");
+  });
+
+  document.getElementById("btnFermerLogin").addEventListener("click", (e) => {
+    e.preventDefault();
+    showState("button");
+  });
+
+  document.getElementById("btnValider").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const mdp = document.getElementById("mdpInput").value.trim();
+    if (!mdp) return;
+
+    const qAdmin = query(collection(db, "membres"), where("mdp_admin", "==", mdp));
+    const adminSnapshot = await getDocs(qAdmin);
+    let membreId = null;
+    let isAdmin = false;
+
+    if (adminSnapshot.size > 0) {
+      membreId = adminSnapshot.docs[0].id;
+      isAdmin = true;
+    } else {
+      const q = query(collection(db, "membres"), where("mdp", "==", mdp));
+      const snapshot = await getDocs(q);
+      if (snapshot.size > 0) {
+        membreId = snapshot.docs[0].id;
+        isAdmin = false;
+      }
+    }
+
+    if (!membreId) {
+      document.getElementById("loginError").textContent = "Mot de passe incorrect";
+      return;
+    }
+
+    currentMembreId = membreId;
+    currentIsAdmin = isAdmin;
+    sessionStorage.setItem("membreId", currentMembreId);
+    sessionStorage.setItem("isAdmin", currentIsAdmin);
+
+    let displayPseudo = getSurnom(membreId);
+    try {
+      const snap = await getDoc(doc(db, "membres", membreId));
+      if (snap.exists() && snap.data().pseudo) {
+        displayPseudo = snap.data().pseudo;
+      }
+    } catch (e) {}
+
+    showState("edt");
+    const welcome = document.getElementById("welcomeMessage");
+    welcome.textContent = isAdmin ? "Bienvenue Admin " + displayPseudo : "Bienvenue " + displayPseudo;
+    document.getElementById("pseudoDisplay").textContent = displayPseudo;
+    document.getElementById("btnEditPseudo").style.display = "inline-block";
+  });
+
+  document.getElementById("btnDeconnexion").addEventListener("click", (e) => {
+    e.preventDefault();
+    currentMembreId = null;
+    currentIsAdmin = false;
+    sessionStorage.removeItem("membreId");
+    sessionStorage.removeItem("isAdmin");
+    document.getElementById("pseudoDisplay").textContent = "";
+    document.getElementById("btnEditPseudo").style.display = "none";
+    showState("button");
+  });
+
+  // Pseudo editing
+  document.getElementById("btnEditPseudo").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("pseudoInput").value = document.getElementById("pseudoDisplay").textContent;
+    document.getElementById("pseudoInput").style.display = "inline-block";
+    document.getElementById("btnSavePseudo").style.display = "inline-block";
+    document.getElementById("btnCancelPseudo").style.display = "inline-block";
+    document.getElementById("btnEditPseudo").style.display = "none";
+    document.getElementById("pseudoDisplay").style.display = "none";
+  });
+
+  document.getElementById("btnCancelPseudo").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("pseudoInput").style.display = "none";
+    document.getElementById("btnSavePseudo").style.display = "none";
+    document.getElementById("btnCancelPseudo").style.display = "none";
+    document.getElementById("btnEditPseudo").style.display = "inline-block";
+    document.getElementById("pseudoDisplay").style.display = "inline";
+  });
+
+  document.getElementById("btnSavePseudo").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const newPseudo = document.getElementById("pseudoInput").value.trim();
+    if (!newPseudo || !currentMembreId) return;
+    try {
+      await setDoc(doc(db, "membres", currentMembreId), { pseudo: newPseudo }, { merge: true });
+      document.getElementById("pseudoDisplay").textContent = newPseudo;
+      const welcome = document.getElementById("welcomeMessage");
+      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + newPseudo : "Bienvenue " + newPseudo;
+      document.getElementById("pseudoInput").style.display = "none";
+      document.getElementById("btnSavePseudo").style.display = "none";
+      document.getElementById("btnCancelPseudo").style.display = "none";
+      document.getElementById("btnEditPseudo").style.display = "inline-block";
+      document.getElementById("pseudoDisplay").style.display = "inline";
+    } catch (e) {
+      document.getElementById("loginError").textContent = "Erreur d'enregistrement";
+    }
+  });
+
+  document.getElementById("mdpInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("btnValider").click();
+  });
+
+  restoreSession();
 </script>
         
 </body>

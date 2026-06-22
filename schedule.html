@@ -304,9 +304,21 @@
             return y + "-" + m + "-" + d; 
         }
 
+        const pseudoOverrides = {};
+
+        async function chargerPseudoFirestore(id) {
+            try {
+                const snap = await getDoc(doc(db, "membres", id));
+                if (snap.exists() && snap.data().pseudo) {
+                    pseudoOverrides[id] = snap.data().pseudo;
+                }
+            } catch (e) {}
+        }
+
         function getSurnom(id) {
-            const m = MEMBRES_DATA.find(x => x.id === id);
-            return m ? (m.surnom || m.nom) : id;
+            if (pseudoOverrides[id]) return pseudoOverrides[id];
+            const m = MEMBRES_DATA.find(m => m.id === id);
+            return m ? m.surnom : id;
         }
 
         function validerContrainteHoraire(jour, contrainte) {
@@ -666,6 +678,7 @@
         if (savedId && savedAdmin !== null) {
             currentMembreId = savedId;
             currentIsAdmin = savedAdmin === "true";
+            await chargerPseudoFirestore(savedId);
             // Recharger l'EDT perso
             const snap = await getDoc(doc(db, "membres", savedId));
             if (snap.exists()) {
@@ -736,6 +749,7 @@
             currentIsAdmin = isAdmin;
             sessionStorage.setItem("membreId", currentMembreId);
             sessionStorage.setItem("isAdmin", currentIsAdmin);
+            await chargerPseudoFirestore(membreId);
             loginError.textContent = "";
             afficherEdtPersonnel(membreData);
             showState("edt");
@@ -758,7 +772,9 @@
             const welcome = document.createElement("div");
             welcome.style.fontSize = "1.2rem";
             welcome.style.fontWeight = "bold";
-            welcome.innerHTML = currentIsAdmin ? "Bienvenue<br>Admin " + (surnom || data.nom) : "Bienvenue<br>" + (surnom || data.nom);
+            const firestorePseudo = pseudoOverrides[currentMembreId];
+            const displaySurnom = firestorePseudo || surnom || data.nom;
+            welcome.innerHTML = currentIsAdmin ? "Bienvenue<br>Admin " + displaySurnom : "Bienvenue<br>" + displaySurnom;
             left.appendChild(welcome);
 
             const center = document.createElement("div");
