@@ -502,7 +502,15 @@
     <div class="container">
         <h1 class="gradient-text" style="font-family: 'EB Garamond'; font-size: 4.0rem;">Plastic4ever</h1>
         <h2 class="gradient-text" style="font-family: 'EB Garamond', serif;margin-top: -1rem;">#plouf</h2>
-        <p  class="gradient-text" style="font-family: 'PlayfairDisplay', serif;">Points de la team : </p>
+        <p class="gradient-text" style="font-family: 'PlayfairDisplay', serif;">Points de la team : <span id="teamWinsDisplay">???</span> / <span id="teamLossesDisplay">???</span>
+            <span id="teamPointsAdmin" style="display:none;">
+                <input type="number" id="teamWinsInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <span style="margin:0 2px;">/</span>
+                <input type="number" id="teamLossesInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">OK</a>
+                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
+            </span>
+        </p>
     </div>
 
 <div class="squares">
@@ -785,16 +793,6 @@
             <input type="text" id="pseudoInput" style="display:none;padding:4px 8px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;width:130px;" placeholder="Nouveau pseudo">
             <a href="#" class="back-btn" id="btnSavePseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Enregistrer</a>
             <a href="#" class="back-btn" id="btnCancelPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
-        </div>
-        <div id="teamPointsZone" style="margin-top:10px;font-size:1rem;">
-            Points de la team : <span id="teamWinsDisplay">???</span> / <span id="teamLossesDisplay">???</span>
-            <span id="teamPointsAdmin" style="display:none;">
-                <input type="number" id="teamWinsInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
-                <span style="margin:0 2px;">/</span>
-                <input type="number" id="teamLossesInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
-                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">OK</a>
-                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
-            </span>
         </div>
     </div>
 
