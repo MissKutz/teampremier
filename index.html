@@ -6,7 +6,7 @@
     <title>Team Premier</title>
     <style>
         body {
-            font-family: 'Poppins', sans-serif, 'Bitter', 'Georgia', 'PlayfairDisplay', 'EB Garamond', 'Lora', 'Bebas Neue';
+            font-family: 'Poppins', sans-serif, 'Bitter', 'Georgia', 'Playfair Display', 'EB Garamond', 'Lora', 'Bebas Neue';
             margin: 0;
             padding: 0;
             display: flex;
@@ -28,6 +28,12 @@
         p {
             font-size: 1.2rem;
             opacity: 0.9;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #f5af19, #f12711, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .back-btn {
@@ -102,14 +108,13 @@
     }
 
     #stateLogin {
-        display: flex;
+        display: none;
         align-items: center;
         justify-content: center;
         gap: 10px;
         flex-wrap: wrap;
         width: 100%;
     }
-    #stateLogin { display: none; }
     #mdpInput {
         padding: 8px;
         border: 1px solid rgba(255,255,255,0.3);
@@ -468,7 +473,8 @@
 
     .agent-face-img {
         width: 100%;
-        height: 100%;       object-fit: cover;
+        height: 100%;
+        object-fit: cover;
         border-radius: 50%;
     }
 
@@ -521,13 +527,127 @@
         border-radius: 50%;
     }
 
+        /* Responsive mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                overflow-x: hidden;
+            }
+            .container {
+                padding: 1rem 0.5rem;
+            }
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+            }
+            h2 {
+                font-size: 1.2rem;
+                margin-top: -0.5rem;
+            }
+            .gradient-text {
+                font-size: 1rem;
+            }
+            #teamWinsInput, #teamLossesInput {
+                width: 45px !important;
+            }
+            .square {
+                width: 160px;
+                height: 160px;
+            }
+            .square-header {
+                padding-top: 1.5rem;
+                padding-left: 0.5rem;
+            }
+            .square-title {
+                font-size: 1rem;
+            }
+            .square-links {
+                font-size: 0.75rem;
+                margin-top: 0.5rem;
+            }
+            .social-icon {
+                width: 14px;
+                height: 14px;
+                margin-right: 4px;
+            }
+            .flip-btn {
+                width: 26px;
+                height: 26px;
+                font-size: 1rem;
+                top: 4px;
+                right: 4px;
+            }
+            .agent-toggle {
+                width: 20px;
+                height: 22px;
+                font-size: 0.75rem;
+            }
+            .agent-choices {
+                font-size: 0.65rem;
+                padding: 2px 4px;
+            }
+            .agent-opt {
+                width: 22px;
+                height: 22px;
+                font-size: 0.75rem;
+            }
+            .pseudo-edit-btn {
+                font-size: 0.65rem;
+            }
+            .pseudo-edit-input {
+                width: 70px;
+                font-size: 0.7rem;
+            }
+            .pseudo-edit-ok, .pseudo-edit-cancel {
+                font-size: 0.65rem;
+                padding: 1px 4px;
+            }
+            .back-btn {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+            #mdpInput {
+                width: 100%;
+                max-width: 180px;
+                box-sizing: border-box;
+            }
+            .footer {
+                padding: 0.8rem 1rem;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .footer .footer-left, .footer .footer-right {
+                width: 100%;
+                justify-content: center;
+            }
+            .footer .footer-right {
+                margin-left: 0;
+            }
+            .row-4, .row-3 {
+                gap: 0.8rem;
+            }
+            #welcomeZone {
+                padding: 0.3rem 0.5rem;
+            }
+            #teamPointsText {
+                font-size: 0.9rem;
+            }
+            .agent-foreground-square {
+                width: 60px;
+                height: 60px;
+            }
+            .agent-face-image.horizontal-list .agent-face-img {
+                width: 50px;
+                height: 50px;
+            }
+        }
  </style>
 </head>
 <body>
     <div class="container">
         <h1 class="gradient-text" style="font-family: 'EB Garamond'; font-size: 4.0rem;">Plastic4ever</h1>
         <h2 class="gradient-text" style="font-family: 'EB Garamond', serif;margin-top: -1rem;">#plouf</h2>
-        <p class="gradient-text" style="font-family: 'PlayfairDisplay', serif;">Points de la team : <span id="teamPointsText">??? / ???</span>
+        <p class="gradient-text" style="font-family: 'Playfair Display', serif;">Points de la team : <span id="teamPointsText">??? / ???</span>
             <span id="teamPointsInputs" style="display:none;">
                 <input type="number" id="teamWinsInput" step="25" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
                 <span style="margin:0 2px;">/</span>
@@ -882,7 +1002,7 @@
     "Morgane": "morgane",
     "Enzo": "enzo",
     "Jules": "jules",
-    "Sebastien": "sebastien",
+    "Sébastien": "sebastien",
     "Orphée": "orphee",
     "Octave": "octave",
     "Clément": "clement"
@@ -1466,7 +1586,7 @@
     "Morgane": "morgane",
     "Enzo": "enzo",
     "Jules": "jules",
-    "Sebastien": "sebastien",
+    "Sébastien": "sebastien",
     "Orphée": "orphee",
     "Octave": "octave",
     "Clément": "clement"

@@ -108,7 +108,7 @@
             background: rgba(255,255,255,0.2);
             font-weight: bold;
         }
-        .contrainte-select {
+        .contrainte-select, .contrainte-input-text {
             display: block;
             margin-top: 4px;
             padding: 4px 8px;
@@ -119,6 +119,9 @@
             font-size: 0.75rem;
             width: 100%;
             box-sizing: border-box;
+        }
+        .contrainte-input-text::placeholder {
+            color: rgba(255,255,255,0.4);
         }
         .save-indicator {
             font-size: 0.85rem;
@@ -250,7 +253,7 @@
                 font-size: 0.65rem;
             }
 
-            .contrainte-input {
+            .contrainte-select, .contrainte-input-text {
                 font-size: 0.6rem;
                 padding: 2px 4px;
                 width: 100%;
@@ -1187,20 +1190,18 @@
                 dotContainer.appendChild(dropdown);
                 td.appendChild(dotContainer);
 
-                // Contrainte dropdown (hidden by default)
+                // Contrainte : select pour orange (heure), input text pour violet (justification)
                 const contrainteSelect = document.createElement("select");
                 contrainteSelect.className = "contrainte-select";
                 contrainteSelect.dataset.membreId = membreId;
                 contrainteSelect.dataset.jour = jour;
-                contrainteSelect.style.display = (statutActuel === "contrainte_horaire" || statutActuel === "abstention") ? "block" : "none";
+                contrainteSelect.style.display = statutActuel === "contrainte_horaire" ? "block" : "none";
                 contrainteSelect.style.marginTop = "4px";
                 contrainteSelect.style.width = "100%";
-                // Option vide
                 const optionVide = document.createElement("option");
                 optionVide.value = "";
                 optionVide.textContent = "...";
                 contrainteSelect.appendChild(optionVide);
-                // Générer les créneaux horaires en fonction du type de match/entrainement
                 const cal = CALENDRIER[i];
                 const startHour = parseInt(cal.horaire.split("h")[0]);
                 const endHour = parseInt(cal.horaire.split("-")[1]);
@@ -1213,9 +1214,23 @@
                         contrainteSelect.appendChild(option);
                     }
                 }
-                contrainteSelect.value = contrainteActuelle;
+                contrainteSelect.value = statutActuel === "contrainte_horaire" ? contrainteActuelle : "";
                 contrainteSelect.addEventListener("change", () => sauvegarderEdt(membreId));
                 td.appendChild(contrainteSelect);
+
+                const contrainteInput = document.createElement("input");
+                contrainteInput.type = "text";
+                contrainteInput.className = "contrainte-input-text";
+                contrainteInput.dataset.membreId = membreId;
+                contrainteInput.dataset.jour = jour;
+                contrainteInput.placeholder = "Raison...";
+                contrainteInput.style.display = statutActuel === "abstention" ? "block" : "none";
+                contrainteInput.style.marginTop = "4px";
+                contrainteInput.style.width = "100%";
+                contrainteInput.style.boxSizing = "border-box";
+                contrainteInput.value = statutActuel === "abstention" ? contrainteActuelle : "";
+                contrainteInput.addEventListener("input", () => sauvegarderEdt(membreId));
+                td.appendChild(contrainteInput);
 
                 tr.appendChild(td);
             }
@@ -1239,11 +1254,9 @@
             dropdown.style.display = "none";
             const td = dot.closest("td");
             const contrainteSelect = td.querySelector(".contrainte-select");
-            if (value === "contrainte_horaire" || value === "abstention") {
-                contrainteSelect.style.display = "block";
-            } else {
-                contrainteSelect.style.display = "none";
-            }
+            const contrainteInput = td.querySelector(".contrainte-input-text");
+            contrainteSelect.style.display = value === "contrainte_horaire" ? "block" : "none";
+            contrainteInput.style.display = value === "abstention" ? "block" : "none";
             sauvegarderEdt(membreId);
         }
 
@@ -1255,8 +1268,10 @@
                 if (!dot) continue;
                 const td = dot.closest("td");
                 const contrainteSelect = td.querySelector(".contrainte-select");
+                const contrainteInput = td.querySelector(".contrainte-input-text");
                 const statut = dot.dataset.value || "absent_reponse";
-                const contrainte = contrainteSelect.style.display !== "none" ? contrainteSelect.value : "";
+                const contrainte = contrainteSelect.style.display !== "none" ? contrainteSelect.value :
+                                  contrainteInput.style.display !== "none" ? contrainteInput.value : "";
                 if (statut === "contrainte_horaire" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
                     saveIndicator.textContent = "\u274c Heure hors cr\u00e9neau pour " + jour + " !";
                     setTimeout(() => { saveIndicator.textContent = ""; }, 3000);
