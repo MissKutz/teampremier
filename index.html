@@ -65,6 +65,9 @@
         gap: 10px;
         align-items: center;
     }
+    .footer .footer-right {
+        margin-left: auto;
+    }
     #stateLogin {
         display: flex;
         align-items: center;
@@ -782,6 +785,8 @@
             <!-- Non connecté -->
             <div class="footer-left" id="stateButton">
                 <a href="#" class="back-btn" id="btnModifier">Se connecter</a>
+            </div>
+            <div class="footer-right" id="stateButtonRight">
                 <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
             </div>
             <!-- Mode login -->
@@ -795,7 +800,7 @@
             <div class="footer-left" id="stateEdt" style="display:none;">
                 <a href="#" class="back-btn" id="btnDeconnexion">Se déconnecter</a>
             </div>
-            <div class="footer-right" style="display:none;">
+            <div class="footer-right" id="stateEdtRight" style="display:none;">
                 <a href="schedule.html" class="back-btn">Voir/modifier le calendrier</a>
             </div>
         </div>
@@ -1127,18 +1132,20 @@
 
   function showState(state) {
     const stateButton = document.getElementById("stateButton");
+    const stateButtonRight = document.getElementById("stateButtonRight");
     const stateLogin = document.getElementById("stateLogin");
     const stateEdt = document.getElementById("stateEdt");
+    const stateEdtRight = document.getElementById("stateEdtRight");
     const welcomeZone = document.getElementById("welcomeZone");
-    const footerRight = document.querySelector(".footer-right");
     stateButton.style.display = "none";
+    if (stateButtonRight) stateButtonRight.style.display = "none";
     stateLogin.style.display = "none";
     stateEdt.style.display = "none";
+    if (stateEdtRight) stateEdtRight.style.display = "none";
     welcomeZone.style.display = "none";
-    footerRight.style.display = "none";
-    if (state === "button") { stateButton.style.display = "flex"; }
+    if (state === "button") { stateButton.style.display = "flex"; if (stateButtonRight) stateButtonRight.style.display = "flex"; }
     else if (state === "login") { stateLogin.style.display = "flex"; }
-    else if (state === "edt") { stateEdt.style.display = "flex"; welcomeZone.style.display = "block"; footerRight.style.display = "flex"; }
+    else if (state === "edt") { stateEdt.style.display = "flex"; if (stateEdtRight) stateEdtRight.style.display = "flex"; welcomeZone.style.display = "block"; }
   }
 
   function getSurnom(id) {
@@ -1165,7 +1172,7 @@
       } catch (e) {}
       showState("edt");
       const welcome = document.getElementById("welcomeMessage");
-      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + currentPseudo : "Bienvenue " + currentPseudo;
+      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(currentPseudo) : "Bienvenue " + getNickname(currentPseudo);
       if (currentPseudo !== getSurnom(savedId)) {
         updateValorantTag(savedId, currentPseudo);
       }
@@ -1227,7 +1234,7 @@
 
     showState("edt");
     const welcome = document.getElementById("welcomeMessage");
-    welcome.textContent = isAdmin ? "Bienvenue Admin " + currentPseudo : "Bienvenue " + currentPseudo;
+    welcome.textContent = isAdmin ? "Bienvenue Admin " + getNickname(currentPseudo) : "Bienvenue " + getNickname(currentPseudo);
     if (currentPseudo !== getSurnom(membreId)) {
       updateValorantTag(membreId, currentPseudo);
     }
@@ -1263,6 +1270,15 @@
     document.getElementById("btnEditPseudo").style.display = "inline-block";
   });
 
+  function getNickname(val) {
+    const idx = val.indexOf('#');
+    return idx >= 0 ? val.substring(0, idx).trim() : val.trim();
+  }
+  function getTag(val) {
+    const idx = val.indexOf('#');
+    return idx >= 0 ? val.substring(idx).trim() : '';
+  }
+
   function updateValorantTag(membreId, newPseudo) {
     const entry = Object.entries(NAME_TO_ID).find(([, id]) => id === membreId);
     if (!entry) return;
@@ -1275,9 +1291,12 @@
         if (li) {
           const parent = li.closest('li');
           if (parent) {
-            const text = parent.textContent.trim();
-            const hashPart = text.includes('#') ? text.substring(text.indexOf('#')) : '';
-            parent.innerHTML = li.outerHTML + newPseudo + ' ' + hashPart;
+            const nick = getNickname(newPseudo);
+            const tag = getTag(newPseudo) || (() => {
+              const text = parent.textContent.trim();
+              return text.includes('#') ? text.substring(text.indexOf('#')).trim() : '';
+            })();
+            parent.innerHTML = li.outerHTML + nick + ' ' + tag;
           }
         }
         break;
