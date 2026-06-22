@@ -770,7 +770,6 @@
     <div id="welcomeZone" style="display:none;text-align:center;padding:0.5rem 2rem;width:100%;box-sizing:border-box;">
         <p id="welcomeMessage" style="font-size:1.2rem;font-weight:bold;margin:0;"></p>
         <div id="pseudoEditZone" style="margin-top:5px;font-size:0.95rem;">
-            <span id="pseudoDisplay"></span>
             <a href="#" class="back-btn" id="btnEditPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Modifier pseudo</a>
             <input type="text" id="pseudoInput" style="display:none;padding:4px 8px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;width:130px;" placeholder="Nouveau pseudo">
             <a href="#" class="back-btn" id="btnSavePseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Enregistrer</a>
@@ -909,8 +908,7 @@
        return;
      }
 
-     inputs.classList.add('visible');
-     inputFields.forEach((input, i) => {
+      inputFields.forEach((input, i) => {
        input.style.display = i < count ? 'block' : 'none';
        if (i < count && agents[i]) input.value = agents[i];
        else if (i >= count) input.value = '';
@@ -1150,6 +1148,7 @@
 
   let currentMembreId = null;
   let currentIsAdmin = false;
+  let currentPseudo = "";
 
   async function restoreSession() {
     const savedId = sessionStorage.getItem("membreId");
@@ -1157,22 +1156,18 @@
     if (savedId && savedAdmin !== null) {
       currentMembreId = savedId;
       currentIsAdmin = savedAdmin === "true";
-      const defaultPseudo = getSurnom(savedId);
-      let displayPseudo = defaultPseudo;
-      let hasCustomPseudo = false;
+      currentPseudo = getSurnom(savedId);
       try {
         const snap = await getDoc(doc(db, "membres", savedId));
         if (snap.exists() && snap.data().pseudo) {
-          displayPseudo = snap.data().pseudo;
-          hasCustomPseudo = true;
+          currentPseudo = snap.data().pseudo;
         }
       } catch (e) {}
       showState("edt");
       const welcome = document.getElementById("welcomeMessage");
-      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + displayPseudo : "Bienvenue " + displayPseudo;
-      if (hasCustomPseudo) {
-        document.getElementById("pseudoDisplay").textContent = displayPseudo;
-        document.getElementById("pseudoDisplay").style.display = "inline";
+      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + currentPseudo : "Bienvenue " + currentPseudo;
+      if (currentPseudo !== getSurnom(savedId)) {
+        updateValorantTag(savedId, currentPseudo);
       }
       document.getElementById("btnEditPseudo").style.display = "inline-block";
     }
@@ -1222,23 +1217,19 @@
     sessionStorage.setItem("membreId", currentMembreId);
     sessionStorage.setItem("isAdmin", currentIsAdmin);
 
-    const defaultPseudo = getSurnom(membreId);
-    let displayPseudo = defaultPseudo;
-    let hasCustomPseudo = false;
+    currentPseudo = getSurnom(membreId);
     try {
       const snap = await getDoc(doc(db, "membres", membreId));
       if (snap.exists() && snap.data().pseudo) {
-        displayPseudo = snap.data().pseudo;
-        hasCustomPseudo = true;
+        currentPseudo = snap.data().pseudo;
       }
     } catch (e) {}
 
     showState("edt");
     const welcome = document.getElementById("welcomeMessage");
-    welcome.textContent = isAdmin ? "Bienvenue Admin " + displayPseudo : "Bienvenue " + displayPseudo;
-    if (hasCustomPseudo) {
-      document.getElementById("pseudoDisplay").textContent = displayPseudo;
-      document.getElementById("pseudoDisplay").style.display = "inline";
+    welcome.textContent = isAdmin ? "Bienvenue Admin " + currentPseudo : "Bienvenue " + currentPseudo;
+    if (currentPseudo !== getSurnom(membreId)) {
+      updateValorantTag(membreId, currentPseudo);
     }
     document.getElementById("btnEditPseudo").style.display = "inline-block";
   });
@@ -1247,9 +1238,9 @@
     e.preventDefault();
     currentMembreId = null;
     currentIsAdmin = false;
+    currentPseudo = "";
     sessionStorage.removeItem("membreId");
     sessionStorage.removeItem("isAdmin");
-    document.getElementById("pseudoDisplay").textContent = "";
     document.getElementById("btnEditPseudo").style.display = "none";
     showState("button");
   });
@@ -1257,12 +1248,11 @@
   // Pseudo editing
   document.getElementById("btnEditPseudo").addEventListener("click", (e) => {
     e.preventDefault();
-    document.getElementById("pseudoInput").value = document.getElementById("pseudoDisplay").textContent;
+    document.getElementById("pseudoInput").value = currentPseudo;
     document.getElementById("pseudoInput").style.display = "inline-block";
     document.getElementById("btnSavePseudo").style.display = "inline-block";
     document.getElementById("btnCancelPseudo").style.display = "inline-block";
     document.getElementById("btnEditPseudo").style.display = "none";
-    document.getElementById("pseudoDisplay").style.display = "none";
   });
 
   document.getElementById("btnCancelPseudo").addEventListener("click", (e) => {
@@ -1271,8 +1261,29 @@
     document.getElementById("btnSavePseudo").style.display = "none";
     document.getElementById("btnCancelPseudo").style.display = "none";
     document.getElementById("btnEditPseudo").style.display = "inline-block";
-    document.getElementById("pseudoDisplay").style.display = "inline";
   });
+
+  function updateValorantTag(membreId, newPseudo) {
+    const entry = Object.entries(NAME_TO_ID).find(([, id]) => id === membreId);
+    if (!entry) return;
+    const memberName = entry[0];
+    const squares = document.querySelectorAll('.square');
+    for (const square of squares) {
+      const title = square.querySelector('.square-title');
+      if (title && title.textContent.trim() === memberName) {
+        const li = square.querySelector('.social-icon[src*="valorant"]');
+        if (li) {
+          const parent = li.closest('li');
+          if (parent) {
+            const text = parent.textContent.trim();
+            const hashPart = text.includes('#') ? text.substring(text.indexOf('#')) : '';
+            parent.innerHTML = li.outerHTML + newPseudo + ' ' + hashPart;
+          }
+        }
+        break;
+      }
+    }
+  }
 
   document.getElementById("btnSavePseudo").addEventListener("click", async (e) => {
     e.preventDefault();
@@ -1280,14 +1291,14 @@
     if (!newPseudo || !currentMembreId) return;
     try {
       await setDoc(doc(db, "membres", currentMembreId), { pseudo: newPseudo }, { merge: true });
-      document.getElementById("pseudoDisplay").textContent = newPseudo;
+      currentPseudo = newPseudo;
       const welcome = document.getElementById("welcomeMessage");
       welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + newPseudo : "Bienvenue " + newPseudo;
+      updateValorantTag(currentMembreId, newPseudo);
       document.getElementById("pseudoInput").style.display = "none";
       document.getElementById("btnSavePseudo").style.display = "none";
       document.getElementById("btnCancelPseudo").style.display = "none";
       document.getElementById("btnEditPseudo").style.display = "inline-block";
-      document.getElementById("pseudoDisplay").style.display = "inline";
     } catch (e) {
       document.getElementById("loginError").textContent = "Erreur d'enregistrement";
     }
