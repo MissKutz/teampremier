@@ -108,7 +108,7 @@
             background: rgba(255,255,255,0.2);
             font-weight: bold;
         }
-        .contrainte-input {
+        .contrainte-select {
             display: block;
             margin-top: 4px;
             padding: 4px 8px;
@@ -119,9 +119,6 @@
             font-size: 0.75rem;
             width: 100%;
             box-sizing: border-box;
-        }
-        .contrainte-input::placeholder {
-            color: rgba(255,255,255,0.4);
         }
         .save-indicator {
             font-size: 0.85rem;
@@ -367,7 +364,6 @@
         <div style="text-align:center;">
             <a href="index.html" class="back-btn">Retour à l'accueil</a>
         </div>
-    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
@@ -990,7 +986,7 @@
                     "<br><span style='font-size:0.75rem;font-weight:normal;'>" + weekDates[i] +
                     "</span><br><span style='font-size:0.75rem;font-weight:normal;'>" + cal.horaire +
                     "</span><br><span style='font-size:0.7rem;font-weight:normal;opacity:0.8;'>" +
-                    (cal.type === "entrainement" ? "Entrainement" : "Match") + "</span>";
+                    (cal.type === "off" ? "" : (cal.type === "entrainement" ? "Entra\u00eenement" : "Match")) + "</span>";
                 headerRow.appendChild(th);
             }
             thead.appendChild(headerRow);
@@ -1082,7 +1078,7 @@
             for (let i = 0; i < JOURS.length; i++) {
                 const td = document.createElement("td");
                 const jour = JOURS[i];
-                if (jour === "lundi" || jour === "mardi") {
+                if (CALENDRIER[i].type === "off") {
                     td.style.background = "rgba(0,0,0,0.12)";
                     td.textContent = "\u2014";
                     td.style.color = "rgba(255,255,255,0.3)";
@@ -1205,7 +1201,7 @@
                 optionVide.textContent = "...";
                 contrainteSelect.appendChild(optionVide);
                 // Générer les créneaux horaires en fonction du type de match/entrainement
-                const cal = CALENDRIER[jour];
+                const cal = CALENDRIER[i];
                 const startHour = parseInt(cal.horaire.split("h")[0]);
                 const endHour = parseInt(cal.horaire.split("-")[1]);
                 for (let h = startHour; h < endHour; h++) {
@@ -1242,12 +1238,11 @@
             dot.style.background = getColorForStatut(value);
             dropdown.style.display = "none";
             const td = dot.closest("td");
-            const contrainteInput = td.querySelector(".contrainte-input");
+            const contrainteSelect = td.querySelector(".contrainte-select");
             if (value === "contrainte_horaire" || value === "abstention") {
-                contrainteInput.style.display = "block";
-                contrainteInput.placeholder = value === "contrainte_horaire" ? "Arrive \u00e0..." : "Contrainte...";
+                contrainteSelect.style.display = "block";
             } else {
-                contrainteInput.style.display = "none";
+                contrainteSelect.style.display = "none";
             }
             sauvegarderEdt(membreId);
         }
@@ -1259,9 +1254,9 @@
                 const dot = document.querySelector(`div[data-membre-id="${membreId}"][data-jour="${jour}"]`);
                 if (!dot) continue;
                 const td = dot.closest("td");
-                const contrainteInput = td.querySelector(".contrainte-input");
+                const contrainteSelect = td.querySelector(".contrainte-select");
                 const statut = dot.dataset.value || "absent_reponse";
-                const contrainte = contrainteInput.style.display !== "none" ? contrainteInput.value : "";
+                const contrainte = contrainteSelect.style.display !== "none" ? contrainteSelect.value : "";
                 if (statut === "contrainte_horaire" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
                     saveIndicator.textContent = "\u274c Heure hors cr\u00e9neau pour " + jour + " !";
                     setTimeout(() => { saveIndicator.textContent = ""; }, 3000);

@@ -45,6 +45,38 @@
         opacity: 0.7;
     }
 
+    .pseudo-edit-btn {
+        margin-left: 4px;
+        text-decoration: none;
+        font-size: 0.8rem;
+        cursor: pointer;
+        opacity: 0.5;
+        vertical-align: middle;
+    }
+    .pseudo-edit-btn:hover { opacity: 1; }
+    .pseudo-edit-input {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 4px;
+        color: #fff;
+        padding: 2px 6px;
+        font-size: 0.8rem;
+        width: 100px;
+        vertical-align: middle;
+    }
+    .pseudo-edit-ok, .pseudo-edit-cancel {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 4px;
+        color: #fff;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        margin-left: 3px;
+        vertical-align: middle;
+    }
+    .pseudo-edit-ok:hover, .pseudo-edit-cancel:hover { background: rgba(255,255,255,0.3); }
+
         .footer {
         margin-top: auto;
         display: flex;
@@ -68,14 +100,7 @@
     .footer .footer-right {
         margin-left: auto;
     }
-    .editable-point {
-        cursor: default;
-        font-weight: bold;
-    }
-    .editable-point.admin {
-        cursor: pointer;
-        text-decoration: underline dotted;
-    }
+
     #stateLogin {
         display: flex;
         align-items: center;
@@ -496,77 +521,34 @@
         border-radius: 50%;
     }
 
-    .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 1rem 2rem;
-    }
-
-    .header-logo {
-        width: 160x;
-        height: 160px;
-        object-fit: contain;
-        border-radius: 8px;
-        background: none;
-        padding: 8px;
-    }
-
-    .header-logo-left {
-        order: 1;
-    }
-
-    .header-logo-right {
-        order: 3;
-    }
-
-    .title-container {
-        order: 2;
-        text-align: center;
-    }
-
-    @media (max-width: 768px) {
-        .header-container {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .header-logo-left,
-        .header-logo-right {
-            order: 2;
-        }
-        
-        .title-container {
-            order: 1;
-        }
-    }
-
  </style>
 </head>
 <body>
-    <div class="header-container">
-        <img src="img/image.teampremier.webp" alt="Team Premier Logo" class="header-logo header-logo-left">
-        <div class="title-container">
-            <h1 class="gradient-text" style="font-family: 'EB Garamond'; font-size: 4.0rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-weight: bold;">Plastic4ever</h1>
-            <h2 class="gradient-text" style="font-family: 'EB Garamond', serif;margin-top: -1rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); font-weight: bold;">#plouf</h2>
-            <p class="gradient-text" style="font-family: 'PlayfairDisplay', serif; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); font-weight: bold;">Point de la team : </p>
-        </div>
-        <img src="img/image.teampremier.webp" alt="Team Premier Logo" class="header-logo header-logo-right">
+    <div class="container">
+        <h1 class="gradient-text" style="font-family: 'EB Garamond'; font-size: 4.0rem;">Plastic4ever</h1>
+        <h2 class="gradient-text" style="font-family: 'EB Garamond', serif;margin-top: -1rem;">#plouf</h2>
+        <p class="gradient-text" style="font-family: 'PlayfairDisplay', serif;">Points de la team : <span id="teamPointsText">??? / ???</span>
+            <span id="teamPointsInputs" style="display:none;">
+                <input type="number" id="teamWinsInput" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <span style="margin:0 2px;">/</span>
+                <input type="number" id="teamLossesInput" style="width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
+                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="font-size:0.85rem;padding:2px 8px;">OK</a>
+                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="font-size:0.85rem;padding:2px 8px;">Annuler</a>
+            </span>
+            <a href="#" class="back-btn" id="btnEditTeamPoints" style="display:none;font-size:0.85rem;padding:2px 8px;">Modifier</a>
+        </p>
     </div>
 
 <div class="squares">
     <div class="row-4">
-            <div class="square">
+            <div class="square" data-member-id="morgane">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Morgane</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">MissKutz #519</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">MissKutz #519</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/874025171713921105" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/morgan_margaux5?igsh=MTcyaWtpMmw4cGhlag==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -597,14 +579,14 @@
     <button class="flip-btn">↻</button>
 </div>
 
-    <div class="square">
+    <div class="square" data-member-id="enzo">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Enzo</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">Misu #773</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">Misu #773</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1216782102515683381" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/enzo0_fr?igsh=MWw4c2N4bmZsNzhpbw==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -635,14 +617,14 @@
     <button class="flip-btn">↻</button>
 </div>
 
-    <div class="square">
+    <div class="square" data-member-id="jules">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Jules</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">quoi #GOAT</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">quoi #GOAT</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1225861361074966539" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/fdm0128?igsh=MW04b3ZudWRqM3Z6dA==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -673,14 +655,14 @@
     <button class="flip-btn">↻</button>
 </div>
 
-    <div class="square">
+    <div class="square" data-member-id="sebastien">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Sébastien</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">Pollux #PoPo</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">Pollux #PoPo</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1173028543370903614" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/sebpollux06?igsh=MXhodGtmYjU4YmJodQ==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -713,14 +695,14 @@
 </div>
 
 <div class="row-3">
-        <div class="square">
+        <div class="square" data-member-id="orphee">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Orphée</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">pawsocks lover #huh</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">pawsocks lover #huh</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1189140602554695760" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/howrphee?igsh=MTRyOHR0djNxZDB3Zw==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -751,14 +733,14 @@
     <button class="flip-btn">↻</button>
 </div>
 
-    <div class="square">
+    <div class="square" data-member-id="octave">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Octave</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-                <li><img src="img/valorant.svg" class="social-icon">Sacaduwu #Ytem</li>
+                <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">Sacaduwu #Ytem</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1247622815851483137" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/octave.dprz?igsh=MW5kb3c4Y3o4dWtmMQ==" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -789,14 +771,14 @@
     <button class="flip-btn">↻</button>
 </div>  
 
-    <div class="square">
+    <div class="square" data-member-id="clement">
     <div class="square-inner">
         <div class="square-front">
             <div class="square-header">
                 <span class="square-title" style="font-family: 'EB Garamond';">Clément</span>
             </div>
             <ul class="square-links" style="font-family: 'EB Garamond';">
-               <li><img src="img/valorant.svg" class="social-icon">Clemrsse #2609</li>
+               <li><img src="img/valorant.svg" class="social-icon"><span class="pseudo-text">Clemrsse #2609</span><a href="#" class="pseudo-edit-btn" style="display:none;">✎</a></li>
                 <li><a href=" https://discord.com/users/1294434297159094273" target="_blank"><img src="img/discord.svg" class="social-icon">discord</a></li>
                 <li><a href="https://www.instagram.com/clem.rsse?igsh=cDloaWtpcG4zd2Y0" target="_blank"><img src="img/instagram.svg" class="social-icon">insta</a></li>
             </ul>
@@ -832,22 +814,7 @@
     <!-- Bienvenue + pseudo zone (au-dessus du footer) -->
     <div id="welcomeZone" style="display:none;text-align:center;padding:0.5rem 2rem;width:100%;box-sizing:border-box;">
         <p id="welcomeMessage" style="font-size:1.2rem;font-weight:bold;margin:0;"></p>
-        <div id="pseudoEditZone" style="margin-top:5px;font-size:0.95rem;">
-            <a href="#" class="back-btn" id="btnEditPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Modifier pseudo</a>
-            <input type="text" id="pseudoInput" style="display:none;padding:4px 8px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;width:130px;" placeholder="Nouveau pseudo">
-            <a href="#" class="back-btn" id="btnSavePseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Enregistrer</a>
-            <a href="#" class="back-btn" id="btnCancelPseudo" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
-        </div>
-        <div id="teamPointsZone" style="margin-top:10px;font-size:1rem;">
-            Points de la team : <span id="teamWinsDisplay">???</span> / <span id="teamLossesDisplay">???</span>
-            <span id="teamPointsAdmin" style="display:none;">
-                <input type="number" id="teamWinsInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
-                <span style="margin:0 2px;">/</span>
-                <input type="number" id="teamLossesInput" style="display:none;width:50px;padding:2px 4px;border:1px solid rgba(255,255,255,0.3);border-radius:5px;background:rgba(255,255,255,0.1);color:#fff;font-size:0.9rem;">
-                <a href="#" class="back-btn" id="btnSaveTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">OK</a>
-                <a href="#" class="back-btn" id="btnCancelTeamPoints" style="display:none;font-size:0.85rem;padding:4px 10px;">Annuler</a>
-            </span>
-        </div>
+        <!-- l'édition du pseudo se fait directement sur les cartes -->
     </div>
 
     <div class="footer">
@@ -1120,6 +1087,81 @@
         }
         renderAgentDisplay(square, config);
       }
+      updatePseudoEditButtons();
+    });
+  }
+
+  function updatePseudoEditButtons() {
+    const membreId = sessionStorage.getItem("membreId");
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    document.querySelectorAll('.square').forEach(square => {
+        const name = getMemberName(square);
+        const targetId = NAME_TO_ID[name];
+        const canEdit = membreId && (membreId === targetId || isAdmin);
+        const btn = square.querySelector('.pseudo-edit-btn');
+        if (btn) btn.style.display = canEdit ? 'inline' : 'none';
+    });
+  }
+
+  window.__updatePseudoEditButtons = updatePseudoEditButtons;
+  
+  function startPseudoEdit(btn) {
+    const li = btn.closest('li');
+    const pseudoText = li.querySelector('.pseudo-text');
+    const currentText = pseudoText.textContent.trim();
+
+    pseudoText.style.display = 'none';
+    btn.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'pseudo-edit-input';
+    input.value = currentText;
+
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'OK';
+    okBtn.className = 'pseudo-edit-ok';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = '✕';
+    cancelBtn.className = 'pseudo-edit-cancel';
+
+    li.appendChild(input);
+    li.appendChild(okBtn);
+    li.appendChild(cancelBtn);
+    input.focus();
+    input.select();
+
+    function endEdit(save) {
+        if (save) {
+        const newVal = input.value.trim();
+        if (newVal && newVal !== currentText) {
+            const square = li.closest('.square');
+            const memberId = square.dataset.memberId;
+            if (window.__saveMemberPseudo) {
+            window.__saveMemberPseudo(memberId, newVal);
+            }
+            pseudoText.textContent = newVal;
+            }
+        }
+        pseudoText.style.display = 'inline';
+        const membreId = sessionStorage.getItem("membreId");
+        const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+        const name = getMemberName(li.closest('.square'));
+        const targetId = NAME_TO_ID[name];
+        if (membreId && (membreId === targetId || isAdmin)) {
+        btn.style.display = 'inline';
+        }
+        input.remove();
+        okBtn.remove();
+        cancelBtn.remove();
+    }
+
+    okBtn.addEventListener('click', () => endEdit(true));
+    cancelBtn.addEventListener('click', () => endEdit(false));
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') endEdit(true);
+        else if (e.key === 'Escape') endEdit(false);
     });
   }
 
@@ -1135,6 +1177,12 @@
     const opt = e.target.closest('.agent-opt');
     if (opt) {
       handleOptClick(opt);
+    }
+    const pseudoBtn = e.target.closest('.pseudo-edit-btn');
+    if (pseudoBtn) {
+        e.preventDefault();
+        startPseudoEdit(pseudoBtn);
+        return;
     }
   });
 
@@ -1240,14 +1288,20 @@
           currentPseudo = snap.data().pseudo;
         }
       } catch (e) {}
+      // Charger le pseudo Firestore de la session dans le pseudo-text de la carte
+        const square = document.querySelector(`.square[data-member-id="${savedId}"]`);
+        if (square) {
+        const span = square.querySelector('.pseudo-text');
+        if (span) span.textContent = currentPseudo;
+        }
       showState("edt");
       const welcome = document.getElementById("welcomeMessage");
       welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(currentPseudo) : "Bienvenue " + getNickname(currentPseudo);
       if (currentPseudo !== getSurnom(savedId)) {
         updateValorantTag(savedId, currentPseudo);
       }
-      document.getElementById("btnEditPseudo").style.display = "inline-block";
       setupTeamPointsEdit();
+      if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
     }
   }
 
@@ -1309,8 +1363,8 @@
     if (currentPseudo !== getSurnom(membreId)) {
       updateValorantTag(membreId, currentPseudo);
     }
-    document.getElementById("btnEditPseudo").style.display = "inline-block";
     setupTeamPointsEdit();
+    if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
   });
 
   document.getElementById("btnDeconnexion").addEventListener("click", (e) => {
@@ -1320,81 +1374,21 @@
     currentPseudo = "";
     sessionStorage.removeItem("membreId");
     sessionStorage.removeItem("isAdmin");
-    document.getElementById("btnEditPseudo").style.display = "none";
     setupTeamPointsEdit();
+    if (window.__updatePseudoEditButtons) window.__updatePseudoEditButtons();
     showState("button");
-  });
-
-  // Pseudo editing
-  document.getElementById("btnEditPseudo").addEventListener("click", (e) => {
-    e.preventDefault();
-    document.getElementById("pseudoInput").value = currentPseudo;
-    document.getElementById("pseudoInput").style.display = "inline-block";
-    document.getElementById("btnSavePseudo").style.display = "inline-block";
-    document.getElementById("btnCancelPseudo").style.display = "inline-block";
-    document.getElementById("btnEditPseudo").style.display = "none";
-  });
-
-  document.getElementById("btnCancelPseudo").addEventListener("click", (e) => {
-    e.preventDefault();
-    document.getElementById("pseudoInput").style.display = "none";
-    document.getElementById("btnSavePseudo").style.display = "none";
-    document.getElementById("btnCancelPseudo").style.display = "none";
-    document.getElementById("btnEditPseudo").style.display = "inline-block";
   });
 
   function getNickname(val) {
     const idx = val.indexOf('#');
     return idx >= 0 ? val.substring(0, idx).trim() : val.trim();
   }
-  function getTag(val) {
-    const idx = val.indexOf('#');
-    return idx >= 0 ? val.substring(idx).trim() : '';
-  }
-
   function updateValorantTag(membreId, newPseudo) {
-    const entry = Object.entries(NAME_TO_ID).find(([, id]) => id === membreId);
-    if (!entry) return;
-    const memberName = entry[0];
-    const squares = document.querySelectorAll('.square');
-    for (const square of squares) {
-      const title = square.querySelector('.square-title');
-      if (title && title.textContent.trim() === memberName) {
-        const li = square.querySelector('.social-icon[src*="valorant"]');
-        if (li) {
-          const parent = li.closest('li');
-          if (parent) {
-            const nick = getNickname(newPseudo);
-            const tag = getTag(newPseudo) || (() => {
-              const text = parent.textContent.trim();
-              return text.includes('#') ? text.substring(text.indexOf('#')).trim() : '';
-            })();
-            parent.innerHTML = li.outerHTML + nick + ' ' + tag;
-          }
-        }
-        break;
-      }
-    }
+    const square = document.querySelector(`.square[data-member-id="${membreId}"]`);
+    if (!square) return;
+    const span = square.querySelector('.pseudo-text');
+    if (span) span.textContent = newPseudo;
   }
-
-  document.getElementById("btnSavePseudo").addEventListener("click", async (e) => {
-    e.preventDefault();
-    const newPseudo = document.getElementById("pseudoInput").value.trim();
-    if (!newPseudo || !currentMembreId) return;
-    try {
-      await setDoc(doc(db, "membres", currentMembreId), { pseudo: newPseudo }, { merge: true });
-      currentPseudo = newPseudo;
-      const welcome = document.getElementById("welcomeMessage");
-      welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(newPseudo) : "Bienvenue " + getNickname(newPseudo);
-      updateValorantTag(currentMembreId, newPseudo);
-      document.getElementById("pseudoInput").style.display = "none";
-      document.getElementById("btnSavePseudo").style.display = "none";
-      document.getElementById("btnCancelPseudo").style.display = "none";
-      document.getElementById("btnEditPseudo").style.display = "inline-block";
-    } catch (e) {
-      document.getElementById("loginError").textContent = "Erreur d'enregistrement";
-    }
-  });
 
   document.getElementById("mdpInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") document.getElementById("btnValider").click();
@@ -1412,86 +1406,59 @@
         teamLosses = d.losses != null ? d.losses : null;
       }
     } catch (e) {}
-    displayTeamPoints();
+    updateTeamPointsDisplay();
   }
 
-  function displayTeamPoints() {
-    document.getElementById("teamWinsDisplay").textContent = teamWins != null ? teamWins : "???";
-    document.getElementById("teamLossesDisplay").textContent = teamLosses != null ? teamLosses : "???";
+  function updateTeamPointsDisplay() {
+    document.getElementById("teamPointsText").textContent =
+      (teamWins != null ? teamWins : "???") + " / " + (teamLosses != null ? teamLosses : "???");
   }
 
-  function setupTeamPointsEdit() {
-    const zone = document.getElementById("teamPointsAdmin");
-    const winsDisp = document.getElementById("teamWinsDisplay");
-    const lossesDisp = document.getElementById("teamLossesDisplay");
-    const winsInp = document.getElementById("teamWinsInput");
-    const lossesInp = document.getElementById("teamLossesInput");
-
-    if (currentIsAdmin) {
-      zone.style.display = "inline";
-      winsDisp.classList.add("admin");
-      lossesDisp.classList.add("admin");
-
-      winsDisp.onclick = (e) => {
-        e.stopPropagation();
-        winsInp.value = teamWins != null ? teamWins : "";
-        winsInp.style.display = "inline-block";
-        lossesInp.style.display = "none";
-        document.getElementById("btnSaveTeamPoints").style.display = "inline-block";
-        document.getElementById("btnCancelTeamPoints").style.display = "inline-block";
-        winsDisp.style.display = "none";
-        lossesDisp.style.display = "none";
-        winsInp.focus();
-      };
-      lossesDisp.onclick = (e) => {
-        e.stopPropagation();
-        lossesInp.value = teamLosses != null ? teamLosses : "";
-        lossesInp.style.display = "inline-block";
-        winsInp.style.display = "none";
-        document.getElementById("btnSaveTeamPoints").style.display = "inline-block";
-        document.getElementById("btnCancelTeamPoints").style.display = "inline-block";
-        winsDisp.style.display = "none";
-        lossesDisp.style.display = "none";
-        lossesInp.focus();
-      };
-    } else {
-      zone.style.display = "none";
-      winsDisp.classList.remove("admin");
-      lossesDisp.classList.remove("admin");
-      winsDisp.onclick = null;
-      lossesDisp.onclick = null;
+  function showTeamPointsEdit(show) {
+    document.getElementById("teamPointsText").style.display = show ? "none" : "inline";
+    document.getElementById("teamPointsInputs").style.display = show ? "inline" : "none";
+    document.getElementById("btnEditTeamPoints").style.display = show ? "none" : (currentIsAdmin ? "inline-block" : "none");
+    if (show) {
+      document.getElementById("teamWinsInput").value = teamWins != null ? teamWins : "";
+      document.getElementById("teamLossesInput").value = teamLosses != null ? teamLosses : "";
     }
   }
 
+  function setupTeamPointsEdit() {
+    document.getElementById("btnEditTeamPoints").style.display = currentIsAdmin ? "inline-block" : "none";
+    showTeamPointsEdit(false);
+  }
+
+  document.getElementById("btnEditTeamPoints").addEventListener("click", (e) => {
+    e.preventDefault();
+    showTeamPointsEdit(true);
+    document.getElementById("teamWinsInput").focus();
+  });
+
   document.getElementById("btnSaveTeamPoints").addEventListener("click", async (e) => {
     e.preventDefault();
-    const winsInp = document.getElementById("teamWinsInput");
-    const lossesInp = document.getElementById("teamLossesInput");
-    const newWins = winsInp.style.display !== "none" ? parseInt(winsInp.value) : teamWins;
-    const newLosses = lossesInp.style.display !== "none" ? parseInt(lossesInp.value) : teamLosses;
-    if (isNaN(newWins) || isNaN(newLosses)) return;
+    const w = parseInt(document.getElementById("teamWinsInput").value);
+    const l = parseInt(document.getElementById("teamLossesInput").value);
+    if (isNaN(w) || isNaN(l)) return;
     try {
-      await setDoc(doc(db, "equipe", "stats"), { wins: newWins, losses: newLosses });
-      teamWins = newWins;
-      teamLosses = newLosses;
+      await setDoc(doc(db, "equipe", "stats"), { wins: w, losses: l });
+      teamWins = w;
+      teamLosses = l;
     } catch (e) {}
-    displayTeamPoints();
-    document.getElementById("teamWinsInput").style.display = "none";
-    document.getElementById("teamLossesInput").style.display = "none";
-    document.getElementById("btnSaveTeamPoints").style.display = "none";
-    document.getElementById("btnCancelTeamPoints").style.display = "none";
-    document.getElementById("teamWinsDisplay").style.display = "inline";
-    document.getElementById("teamLossesDisplay").style.display = "inline";
+    updateTeamPointsDisplay();
+    showTeamPointsEdit(false);
   });
 
   document.getElementById("btnCancelTeamPoints").addEventListener("click", (e) => {
     e.preventDefault();
-    document.getElementById("teamWinsInput").style.display = "none";
-    document.getElementById("teamLossesInput").style.display = "none";
-    document.getElementById("btnSaveTeamPoints").style.display = "none";
-    document.getElementById("btnCancelTeamPoints").style.display = "none";
-    document.getElementById("teamWinsDisplay").style.display = "inline";
-    document.getElementById("teamLossesDisplay").style.display = "inline";
+    showTeamPointsEdit(false);
+  });
+
+  document.getElementById("teamWinsInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("btnSaveTeamPoints").click();
+  });
+  document.getElementById("teamLossesInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("btnSaveTeamPoints").click();
   });
 
   // --- Agent config Firestore ---
@@ -1540,6 +1507,19 @@
       console.error("Erreur sauvegarde agent", e);
     }
   };
+
+  window.__saveMemberPseudo = async function(memberId, newPseudo) {
+    try {
+        await setDoc(doc(db, "membres", memberId), { pseudo: newPseudo }, { merge: true });
+        if (memberId === currentMembreId) {
+        currentPseudo = newPseudo;
+        const welcome = document.getElementById("welcomeMessage");
+        welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + getNickname(newPseudo) : "Bienvenue " + getNickname(newPseudo);
+        }
+    } catch (e) {
+        console.error("Erreur sauvegarde pseudo", e);
+    }
+    };
 
   loadAgentConfigs();
 
