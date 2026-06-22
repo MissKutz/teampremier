@@ -1157,18 +1157,23 @@
     if (savedId && savedAdmin !== null) {
       currentMembreId = savedId;
       currentIsAdmin = savedAdmin === "true";
-      // Récupérer le pseudo Firestore s'il existe
-      let displayPseudo = getSurnom(savedId);
+      const defaultPseudo = getSurnom(savedId);
+      let displayPseudo = defaultPseudo;
+      let hasCustomPseudo = false;
       try {
         const snap = await getDoc(doc(db, "membres", savedId));
         if (snap.exists() && snap.data().pseudo) {
           displayPseudo = snap.data().pseudo;
+          hasCustomPseudo = true;
         }
       } catch (e) {}
       showState("edt");
       const welcome = document.getElementById("welcomeMessage");
       welcome.textContent = currentIsAdmin ? "Bienvenue Admin " + displayPseudo : "Bienvenue " + displayPseudo;
-      document.getElementById("pseudoDisplay").textContent = displayPseudo;
+      if (hasCustomPseudo) {
+        document.getElementById("pseudoDisplay").textContent = displayPseudo;
+        document.getElementById("pseudoDisplay").style.display = "inline";
+      }
       document.getElementById("btnEditPseudo").style.display = "inline-block";
     }
   }
@@ -1217,18 +1222,24 @@
     sessionStorage.setItem("membreId", currentMembreId);
     sessionStorage.setItem("isAdmin", currentIsAdmin);
 
-    let displayPseudo = getSurnom(membreId);
+    const defaultPseudo = getSurnom(membreId);
+    let displayPseudo = defaultPseudo;
+    let hasCustomPseudo = false;
     try {
       const snap = await getDoc(doc(db, "membres", membreId));
       if (snap.exists() && snap.data().pseudo) {
         displayPseudo = snap.data().pseudo;
+        hasCustomPseudo = true;
       }
     } catch (e) {}
 
     showState("edt");
     const welcome = document.getElementById("welcomeMessage");
     welcome.textContent = isAdmin ? "Bienvenue Admin " + displayPseudo : "Bienvenue " + displayPseudo;
-    document.getElementById("pseudoDisplay").textContent = displayPseudo;
+    if (hasCustomPseudo) {
+      document.getElementById("pseudoDisplay").textContent = displayPseudo;
+      document.getElementById("pseudoDisplay").style.display = "inline";
+    }
     document.getElementById("btnEditPseudo").style.display = "inline-block";
   });
 
