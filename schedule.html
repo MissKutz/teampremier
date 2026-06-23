@@ -424,6 +424,7 @@
                         nom: m.nom,
                         mdp: m.mdp,
                             ...(m.mdp_admin ? { mdp_admin: m.mdp_admin } : {}),
+                        role: "principal",
                         edt
                     });
                 }
@@ -524,11 +525,48 @@
             return hour >= startHour && hour < endHour;
         }
 
+        function sortByConstraintTime(players) {
+            return [...players].sort((a, b) => {
+                const timeA = a.contrainte.match(/(\d{1,2})h(\d{2})?/);
+                const timeB = b.contrainte.match(/(\d{1,2})h(\d{2})?/);
+                if (!timeA || !timeB) return 0;
+                const totalA = parseInt(timeA[1]) * 60 + (timeA[2] ? parseInt(timeA[2]) : 0);
+                const totalB = parseInt(timeB[1]) * 60 + (timeB[2] ? parseInt(timeB[2]) : 0);
+                return totalA - totalB;
+            });
+        }
+
+        function selectByPriority(mainGreens, subGreens, mainOranges, subOranges, mainViolets, subViolets, count) {
+            const tiers = [
+                mainGreens,
+                subGreens,
+                sortByConstraintTime(mainOranges),
+                sortByConstraintTime(subOranges),
+                mainViolets,
+                subViolets,
+            ];
+            const result = [];
+            let remaining = count;
+            let excessTier = -1;
+            for (let t = 0; t < tiers.length && remaining > 0; t++) {
+                if (tiers[t].length === 0) continue;
+                if (tiers[t].length <= remaining) {
+                    result.push(...tiers[t]);
+                    remaining -= tiers[t].length;
+                } else {
+                    excessTier = t;
+                    break;
+                }
+            }
+            return { selected: result, remaining, excessTier, tiers };
+        }
+
         async function getGameInfo(weekKey, membres, jourIndex) {
             const jour = JOURS[jourIndex];
             const cal = CALENDRIER[jourIndex];
             if (cal.type === "off") return { time: "Rien", players: "", count: 0, cancelled: false, selectedSurnoms: [], allGreens: [] };
-            const greens = [], oranges = [], violets = [];
+            const mainGreens = [], mainOranges = [], mainViolets = [];
+            const subGreens = [], subOranges = [], subViolets = [];
             for (const membre of membres) {
                 const semaineEdt = membre.edt?.[weekKey] || {};
                 const statut = semaineEdt[jour]?.statut || "absent_reponse";
@@ -536,54 +574,79 @@
                 if (statut === "present" && contrainte && !validerContrainteHoraire(jour, contrainte)) {
                     continue;
                 }
-                if (statut === "present") greens.push({ surnom: getSurnom(membre.id), contrainte });
-                else if (statut === "contrainte_horaire") oranges.push({ surnom: getSurnom(membre.id), contrainte });
-                else if (statut === "abstention") violets.push({ surnom: getSurnom(membre.id), contrainte });
+                const entry = { surnom: membre.nom || getSurnom(membre.id), contrainte, id: membre.id };
+                if ((membre.role || "principal") === "remplacant") {
+                    if (statut === "present") subGreens.push(entry);
+                    else if (statut === "contrainte_horaire") subOranges.push(entry);
+                    else if (statut === "abstention") subViolets.push(entry);
+                } else {
+                    if (statut === "present") mainGreens.push(entry);
+                    else if (statut === "contrainte_horaire") mainOranges.push(entry);
+                    else if (statut === "abstention") mainViolets.push(entry);
+                }
             }
-            const totalAvailable = greens.length + oranges.length + violets.length;
+            const totalAvailable = mainGreens.length + mainOranges.length + mainViolets.length + subGreens.length + subOranges.length + subViolets.length;
+            const allGreens = [...mainGreens, ...subGreens];
             const cancelled = totalAvailable < 5;
             let selected;
             if (cancelled) {
-                selected = [...greens, ...oranges, ...violets];
-            } else if (greens.length > 5) {
-                // Roulette auto : stockée dans Firestore
-                const rouletteRef = doc(db, "roulettes", weekKey);
-                let rouletteData = {};
-                try {
-                    const snap = await getDoc(rouletteRef);
-                    if (snap.exists()) rouletteData = snap.data();
-                } catch (e) {}
-                let stored = rouletteData[jour];
-                if (stored && Array.isArray(stored) && stored.length === 5) {
-                    selected = stored.map(name => greens.find(x => x.surnom === name) || { surnom: name, contrainte: "" });
-                    if (selected.length < 5) stored = null;
-                }
-                if (!stored) {
-                    const shuffled = [...greens].sort(() => Math.random() - 0.5);
-                    selected = shuffled.slice(0, 5);
-                    rouletteData[jour] = selected.map(s => s.surnom);
-                    try {
-                        await setDoc(rouletteRef, rouletteData, { merge: true });
-                    } catch (e) {}
-                }
+                const p = selectByPriority(mainGreens, subGreens, mainOranges, subOranges, mainViolets, subViolets, totalAvailable);
+                selected = p.selected;
             } else {
-                // Si totalAvailable >= 5 et greens.length <= 5, sélectionner tous les greens + les oranges les plus tôt
-                // Ex: 4 verts + 2 oranges → sélectionner tous les 4 verts + l'orange le plus tôt
-                const allCandidates = [...greens, ...oranges, ...violets];
-                // Trier les oranges par heure de contrainte (la plus tôt en premier)
-                const sortedOranges = oranges.sort((a, b) => {
-                    const timeA = a.contrainte.match(/(\d{1,2})h(\d{2})?/);
-                    const timeB = b.contrainte.match(/(\d{1,2})h(\d{2})?/);
-                    if (!timeA || !timeB) return 0;
-                    const totalA = parseInt(timeA[1]) * 60 + (timeA[2] ? parseInt(timeA[2]) : 0);
-                    const totalB = parseInt(timeB[1]) * 60 + (timeB[2] ? parseInt(timeB[2]) : 0);
-                    return totalA - totalB;
-                });
-                // Sélectionner tous les greens + les oranges les plus tôt pour atteindre 5 joueurs
-                const needed = Math.min(5, greens.length + sortedOranges.length);
-                const earliestOranges = sortedOranges.slice(0, needed - greens.length);
-                selected = [...greens, ...earliestOranges];
-                if (selected.length > 5) selected = selected.slice(0, 5);
+                const p = selectByPriority(mainGreens, subGreens, mainOranges, subOranges, mainViolets, subViolets, 5);
+                if (p.excessTier >= 0 && (p.excessTier === 0 || p.excessTier === 1)) {
+                    // Besoin de roulette dans une tier verte (mainGreen ou subGreen)
+                    const rouletteRef = doc(db, "roulettes", weekKey);
+                    let rouletteData = {};
+                    try {
+                        const snap = await getDoc(rouletteRef);
+                        if (snap.exists()) rouletteData = snap.data();
+                    } catch (e) {}
+                    let stored = rouletteData[jour];
+                    let rebuild = false;
+                    if (stored && Array.isArray(stored) && stored.length === 5) {
+                        // Vérifier que les 5 stockés sont bien dans le pool vert éligible
+                        const eligible = new Set(allGreens.map(s => s.surnom));
+                        if (stored.every(name => eligible.has(name))) {
+                            selected = stored.map(name =>
+                                allGreens.find(x => x.surnom === name) || { surnom: name, contrainte: "" }
+                            );
+                        } else {
+                            rebuild = true;
+                        }
+                    } else {
+                        rebuild = true;
+                    }
+                    if (rebuild) {
+                        // Sélection : prendre ce qui a déjà été pris + un sous-ensemble aléatoire de la tier en excès
+                        const excessPlayers = p.tiers[p.excessTier];
+                        const shuffled = [...excessPlayers].sort(() => Math.random() - 0.5);
+                        const fromExcess = shuffled.slice(0, p.remaining);
+                        const after = [];
+                        let rem2 = 5 - (p.selected.length + fromExcess.length);
+                        for (let t = p.excessTier + 1; t < p.tiers.length && rem2 > 0; t++) {
+                            if (p.tiers[t].length <= rem2) {
+                                after.push(...p.tiers[t]);
+                                rem2 -= p.tiers[t].length;
+                            } else {
+                                after.push(...p.tiers[t].slice(0, rem2));
+                                rem2 = 0;
+                            }
+                        }
+                        selected = [...p.selected, ...fromExcess, ...after].slice(0, 5);
+                        rouletteData[jour] = selected.map(s => s.surnom);
+                        try {
+                            await setDoc(rouletteRef, rouletteData, { merge: true });
+                        } catch (e) {}
+                    }
+                } else {
+                    // Sélection déterministe : prendre les premiers par priorité
+                    selected = [...p.selected];
+                    if (p.excessTier >= 0) {
+                        selected.push(...p.tiers[p.excessTier].slice(0, p.remaining));
+                    }
+                    if (selected.length > 5) selected = selected.slice(0, 5);
+                }
             }
             const typeLabel = cal.type === "entrainement" ? "entrainement" : "match";
             const scheduledStart = parseInt(cal.horaire.split("h")[0]);
@@ -594,7 +657,7 @@
             } else {
                 let maxTime = -1;
                 for (const s of selected) {
-                    const o = oranges.find(x => x.surnom === s.surnom);
+                    const o = [...mainOranges, ...subOranges].find(x => x.surnom === s.surnom);
                     if (o && o.contrainte) {
                         const m = o.contrainte.match(/(\d{1,2})h(\d{2})?/);
                         if (m) {
@@ -619,7 +682,7 @@
                 count: selected.length,
                 cancelled,
                 selectedSurnoms: selected.map(s => s.surnom),
-                allGreens: greens.map(s => s.surnom)
+                allGreens: allGreens.map(s => s.surnom)
             };
         }
 
@@ -660,8 +723,18 @@
             for (const membre of membres) {
                 const tr = document.createElement("tr");
                 const tdNom = document.createElement("td");
-                tdNom.textContent = membre.nom || membre.id;
                 tdNom.style.fontWeight = "bold";
+                const nameSpan = document.createElement("span");
+                nameSpan.textContent = membre.nom || membre.id;
+                tdNom.appendChild(nameSpan);
+                if ((membre.role || "principal") === "remplacant") {
+                    const badge = document.createElement("span");
+                    badge.textContent = " (R)";
+                    badge.style.fontSize = "0.8rem";
+                    badge.style.color = "#8A2BE2";
+                    badge.style.fontWeight = "bold";
+                    tdNom.appendChild(badge);
+                }
                 tr.appendChild(tdNom);
 
                 for (let i = 0; i < JOURS.length; i++) {
@@ -788,6 +861,7 @@
                 for (let i = 0; i < 7; i++) {
                     const info = allInfos[i];
                     if (!info || info.cancelled || info.allGreens.length <= 5) continue;
+                    if (isPastDay(weekOffset, i)) continue;
                     const date = weekDates[i];
                     const selected = info.selectedSurnoms;
                     const notSelected = info.allGreens.filter(s => !selected.includes(s));
@@ -796,7 +870,7 @@
                     rouletteParts.push(`<b>roulette du ${date}</b> : ${bold} ${faded}`);
                 }
                 const rd = document.querySelector("#navGeneral .roulette-display");
-                if (rd) rd.innerHTML = rouletteParts.join(" &nbsp;|&nbsp; ");
+                if (rd) rd.innerHTML = rouletteParts.join("<br>");
             }
         }
 
@@ -806,7 +880,7 @@
                 '<button class="btn btn-secondary nav-next">&#9654;</button>' +
                 '<button class="btn btn-secondary nav-today">Semaine actuelle</button>';
             document.getElementById("navPerso").innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;">' + navBase + '</div>';
-            document.getElementById("navGeneral").innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;"><span class="roulette-display" style="font-size:0.8rem;color:#aaa;"></span>' + navBase + '</div>';
+            document.getElementById("navGeneral").innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:15px;margin:10px 0 20px 0;flex-wrap:wrap;"><div class="roulette-display" style="font-size:0.8rem;color:#aaa;width:100%;text-align:center;line-height:1.6;"></div>' + navBase + '</div>';
             document.querySelectorAll("#navPerso .nav-prev, #navGeneral .nav-prev")
                 .forEach(b => b.addEventListener("click", () => changeWeek(-1)));
             document.querySelectorAll("#navPerso .nav-next, #navGeneral .nav-next")
