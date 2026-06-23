@@ -1130,7 +1130,7 @@
   function canEditSquare(name) {
     const membreId = sessionStorage.getItem("membreId");
     const isAdmin = sessionStorage.getItem("isAdmin") === "true";
-    if (!membreId) return true; // pas connecté → localStorage
+    if (!membreId) return false;
     const targetId = NAME_TO_ID[name];
     return membreId === targetId || isAdmin;
   }
@@ -1758,7 +1758,11 @@
     if (!id) return;
     const savedId = sessionStorage.getItem("membreId");
     const isAdmin = sessionStorage.getItem("isAdmin") === "true";
-    if (savedId && savedId !== id && !isAdmin) {
+    if (!savedId) {
+      alert("Vous ne pouvez modifier que votre propre carte.");
+      return;
+    }
+    if (savedId !== id && !isAdmin) {
       alert("Vous ne pouvez modifier que votre propre carte.");
       return;
     }
